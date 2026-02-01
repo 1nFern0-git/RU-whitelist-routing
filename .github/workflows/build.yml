@@ -79,76 +79,16 @@ jobs:
           tag_name: ${{ steps.tag.outputs.tag }}
           name: Release ${{ steps.tag.outputs.tag }}
           body: |
-            # RU Whitelist Routing - Release ${{ steps.tag.outputs.tag }}
+            # Release ${{ steps.tag.outputs.tag }}
             
-            Автоматическая сборка `geoip.dat` и `geosite.dat` с дополнительными whitelist категориями из российских источников.
+            `geoip.dat` и `geosite.dat` с whitelist категориями из российских источников.
             
-            ## Категории
+            **Категории:**
+            - **WHITELIST** (GeoIP) - IP адреса
+            - **WHITELIST-RU** (GeoSite) - Российские домены
+            - **WHITELIST-ADS** (GeoSite) - Рекламные домены
             
-            ### GeoIP
-            - **WHITELIST** - IP адреса из российских источников
-            
-            ### GeoSite
-            - **WHITELIST-RU** - Российские домены
-            - **WHITELIST-ADS** - Рекламные домены
-            
-            ## Использование
-            
-            ### Xray/V2Ray
-            ```json
-            {
-              "routing": {
-                "rules": [
-                  {
-                    "type": "field",
-                    "ip": ["geoip:WHITELIST"],
-                    "outboundTag": "direct"
-                  },
-                  {
-                    "type": "field",
-                    "domain": ["geosite:WHITELIST-RU", "geosite:WHITELIST-ADS"],
-                    "outboundTag": "direct"
-                  }
-                ]
-              }
-            }
-            ```
-            
-            ### Sing-box
-            ```json
-            {
-              "route": {
-                "rules": [
-                  {
-                    "geoip": "WHITELIST",
-                    "outbound": "direct"
-                  },
-                  {
-                    "geosite": ["WHITELIST-RU", "WHITELIST-ADS"],
-                    "outbound": "direct"
-                  }
-                ]
-              }
-            }
-            ```
-            
-            ### Clash Meta
-            ```yaml
-            rules:
-              - GEOIP,WHITELIST,DIRECT
-              - GEOSITE,WHITELIST-RU,DIRECT
-              - GEOSITE,WHITELIST-ADS,DIRECT
-            ```
-            
-            ## Источники данных
-            
-            - GeoIP базовый файл: [hydraponique/roscomvpn-geoip](https://github.com/hydraponique/roscomvpn-geoip)
-            - GeoSite базовый файл: [hydraponique/roscomvpn-geosite](https://github.com/hydraponique/roscomvpn-geosite)
-            - Whitelist данные: [kirilllavrov/RU-domain-list-for-whitelist](https://github.com/kirilllavrov/RU-domain-list-for-whitelist)
-            
-            ---
-            
-            Дата сборки: ${{ steps.tag.outputs.tag }}
+            **Использование:** см. [README](https://github.com/1nFern0-git/RU-whitelist-routing#readme)
           files: |
             output/geoip.dat
             output/geosite.dat
