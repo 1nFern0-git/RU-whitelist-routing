@@ -14,6 +14,7 @@
   "DnsHosts": {},
   "DirectSites": [
     "geosite:private",
+    "geosite:torrent",
     "geosite:category-ru",
     "geosite:apple",
     "geosite:google-play",
@@ -34,7 +35,6 @@
   ],
   "ProxyIp": [],
   "BlockSites": [
-    "geosite:torrent",
     "geosite:category-ads"
   ],
   "BlockIp": [],
