@@ -167,6 +167,9 @@ def main():
     
     # Process IP addresses from IPchecked directory
     print("\n=== Processing IP addresses ===", file=sys.stderr)
+    if not config['categories']['geoip']:
+        print("ERROR: No geoip categories found in config", file=sys.stderr)
+        return 1
     ip_category = config['categories']['geoip'][0]
     ip_source_path = ip_category['source']
     
@@ -196,7 +199,11 @@ def main():
     
     # Process RU domains
     print("\n=== Processing RU domains ===", file=sys.stderr)
-    ru_category = [cat for cat in config['categories']['geosite'] if cat['name'] == 'WHITELIST-RU'][0]
+    ru_categories = [cat for cat in config['categories']['geosite'] if cat['name'] == 'WHITELIST-RU']
+    if not ru_categories:
+        print("ERROR: WHITELIST-RU category not found in config", file=sys.stderr)
+        return 1
+    ru_category = ru_categories[0]
     ru_source_path = ru_category['source']
     
     ru_files = fetch_github_directory_files(whitelist_repo, ru_source_path, whitelist_branch)
@@ -225,7 +232,11 @@ def main():
     
     # Process Ads domains
     print("\n=== Processing Ads domains ===", file=sys.stderr)
-    ads_category = [cat for cat in config['categories']['geosite'] if cat['name'] == 'WHITELIST-ADS'][0]
+    ads_categories = [cat for cat in config['categories']['geosite'] if cat['name'] == 'WHITELIST-ADS']
+    if not ads_categories:
+        print("ERROR: WHITELIST-ADS category not found in config", file=sys.stderr)
+        return 1
+    ads_category = ads_categories[0]
     ads_source_path = ads_category['source']
     
     ads_files = fetch_github_directory_files(whitelist_repo, ads_source_path, whitelist_branch)
