@@ -109,13 +109,16 @@ jobs:
         run: |
           mkdir -p ../output
           go run ./ --datapath=./data --outputdir=../output
-          mv ../output/dlc.dat ../output/geosite.dat
+          # v2fly/domain-list-community outputs dlc.dat
+          mv ../output/dlc.dat ../output/geosite-whitelist.dat
 
       # === MERGE WITH BASE FILES ===
       - name: Merge with base geosite.dat
         run: |
-          cat downloads/geosite-base.dat output/geosite.dat > output/geosite-merged.dat
-          mv output/geosite-merged.dat output/geosite.dat
+          # Concatenate base geosite.dat with our whitelist categories
+          # This works because protobuf repeated fields can be appended
+          cat downloads/geosite-base.dat output/geosite-whitelist.dat > output/geosite.dat
+          rm output/geosite-whitelist.dat
 
       # === RELEASE ===
       - name: Set release tag
