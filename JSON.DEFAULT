@@ -1,0 +1,44 @@
+{
+  "Name": "Freenternet_RU",
+  "GlobalProxy": "true",
+  "RouteOrder": "block-proxy-direct",
+  "RemoteDNSType": "DoU",
+  "RemoteDNSDomain": "https://cloudflare-dns.com/dns-query",
+  "RemoteDNSIP": "1.1.1.1",
+  "DomesticDNSType": "DoU",
+  "DomesticDNSDomain": "https://common.dot.dns.yandex.net/dns-query",
+  "DomesticDNSIP": "77.88.8.8",
+  "Geoipurl": "https://github.com/1nFern0-git/RU-whitelist-routing/releases/latest/download/geoip.dat",
+  "Geositeurl": "https://github.com/1nFern0-git/RU-whitelist-routing/releases/latest/download/geosite.dat",
+  "LastUpdated": "",
+  "DnsHosts": {},
+  "DirectSites": [
+    "geosite:private",
+    "geosite:category-ru",
+    "geosite:apple",
+    "geosite:google-play",
+    "geosite:epicgames",
+    "geosite:riot",
+    "geosite:escapefromtarkov",
+    "geosite:steam",
+    "geosite:twitch",
+    "geosite:pinterest",
+    "geosite:faceit"
+  ],
+  "DirectIp": [
+    "geoip:private",
+    "geoip:direct"
+  ],
+  "ProxySites": [
+    "geosite:twitch-ads"
+  ],
+  "ProxyIp": [],
+  "BlockSites": [
+    "geosite:torrent",
+    "geosite:category-ads"
+  ],
+  "BlockIp": [],
+  "DomainStrategy": "IPIfNonMatch",
+  "FakeDNS": "false",
+  "UseChunkFiles": "true"
+}
