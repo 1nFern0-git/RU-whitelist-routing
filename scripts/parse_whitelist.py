@@ -88,8 +88,12 @@ def parse_ip_addresses(content):
     """
     ips = []
     
-    # IP address pattern (simple validation)
-    ip_pattern = re.compile(r'^(\d{1,3}\.){3}\d{1,3}(/\d{1,2})?$')
+    # IP address pattern with proper octet validation (0-255)
+    ip_pattern = re.compile(
+        r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}'
+        r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
+        r'(?:/(?:3[0-2]|[1-2]?[0-9]))?$'
+    )
     
     for line in content.splitlines():
         line = line.strip()
@@ -117,6 +121,14 @@ def parse_domains(content):
     """
     domains = []
     
+    # Domain validation pattern (basic but proper)
+    # Allows letters, numbers, hyphens, and dots
+    # Must start with alphanumeric, end with alphanumeric
+    # Must have at least one dot
+    domain_pattern = re.compile(
+        r'^(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
+    )
+    
     for line in content.splitlines():
         line = line.strip()
         
@@ -128,8 +140,8 @@ def parse_domains(content):
         if line.startswith('domain:'):
             line = line[7:].strip()
         
-        # Basic domain validation
-        if line and '.' in line:
+        # Validate domain format
+        if line and domain_pattern.match(line):
             domains.append(line)
     
     return domains
