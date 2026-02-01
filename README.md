@@ -62,15 +62,11 @@ python scripts/merge_geosite.py
 
 Результаты в `output/geoip.dat` и `output/geosite.dat`.
 
-
-
 ## Источники
 
 - [hydraponique/roscomvpn-geoip](https://github.com/hydraponique/roscomvpn-geoip) - базовый GeoIP файл
 - [hydraponique/roscomvpn-geosite](https://github.com/hydraponique/roscomvpn-geosite) - базовый GeoSite файл
 - [kirilllavrov/RU-domain-list-for-whitelist](https://github.com/kirilllavrov/RU-domain-list-for-whitelist) - whitelist данные
-
-
 
 ## Лицензия
 
