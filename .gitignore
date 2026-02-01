@@ -12,8 +12,6 @@ dist/
 downloads/
 data/
 output/
-geoip-builder/
-geosite-builder/
 .vscode/
 .idea/
 *.swp

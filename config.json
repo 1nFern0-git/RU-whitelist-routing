@@ -1,0 +1,38 @@
+{
+  "sources": {
+    "geoip": {
+      "repo": "hydraponique/roscomvpn-geoip",
+      "asset": "geoip.dat"
+    },
+    "geosite": {
+      "repo": "hydraponique/roscomvpn-geosite",
+      "asset": "geosite.dat"
+    },
+    "whitelist": {
+      "repo": "kirilllavrov/RU-domain-list-for-whitelist",
+      "branch": "main"
+    }
+  },
+  "categories": {
+    "geoip": [
+      {
+        "name": "WHITELIST",
+        "source": "IPchecked"
+      }
+    ],
+    "geosite": [
+      {
+        "name": "WHITELIST-RU",
+        "source": "domains/ru"
+      },
+      {
+        "name": "WHITELIST-ADS",
+        "source": "domains/ads"
+      }
+    ]
+  },
+  "release": {
+    "schedule": "0 0 */3 * *",
+    "tag_format": "YYYYMMDD"
+  }
+}
