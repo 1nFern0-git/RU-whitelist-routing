@@ -1,162 +1,101 @@
-name: Build GeoIP & GeoSite with Whitelist
+name: Build GeoIP and GeoSite
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 0 */3 * *'  # Каждые 3 дня
+    - cron: '0 0 */3 * *'  # Run every 3 days at 00:00 UTC
+  workflow_dispatch:  # Allow manual trigger
   push:
     branches:
       - main
     paths-ignore:
       - 'README.md'
-      - '.gitignore'
       - 'LICENSE'
-
-permissions:
-  contents: write
+      - '.gitignore'
 
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
-
+    
+    permissions:
+      contents: write
+    
     steps:
-      # === CHECKOUT ===
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      # === SETUP ===
-      - name: Set up Python
+      
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Install Python dependencies
-        run: pip install requests
-
-      # === GEOIP PROCESSING ===
-      - name: Checkout v2fly/geoip
-        uses: actions/checkout@v4
-        with:
-          repository: v2fly/geoip
-          path: geoip-builder
-          fetch-depth: 1
-
-      - name: Set up Go for GeoIP
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: geoip-builder/go.mod
-          cache-dependency-path: geoip-builder/go.sum
-
-      - name: Download base geoip.dat from hydraponique
+          cache: 'pip'
+      
+      - name: Install dependencies
         run: |
-          mkdir -p downloads
-          curl -fsSL -o downloads/geoip-base.dat \
-            https://github.com/hydraponique/roscomvpn-geoip/releases/latest/download/geoip.dat
-          echo "Downloaded base geoip.dat: $(du -h downloads/geoip-base.dat)"
-
-      - name: Fetch whitelist IPs
-        run: python scripts/fetch_whitelist_ips.py
-
-      - name: Prepare GeoIP config
-        run: |
-          cp configs/geoip-config.json geoip-builder/config.json
-          cp data/whitelist-ips.txt geoip-builder/
-
-      - name: Build GeoIP with WHITELIST category
-        working-directory: geoip-builder
-        run: |
-          go run ./ --config=config.json
-          mkdir -p ../output
-          mv output/dat/geoip.dat ../output/geoip.dat
-
-      # === GEOSITE PROCESSING ===
-      - name: Checkout v2fly/domain-list-community
-        uses: actions/checkout@v4
-        with:
-          repository: v2fly/domain-list-community
-          path: geosite-builder
-          fetch-depth: 1
-
-      - name: Set up Go for GeoSite
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: geosite-builder/go.mod
-          cache-dependency-path: geosite-builder/go.sum
-
-      - name: Download base geosite.dat from hydraponique
-        run: |
-          curl -fsSL -o downloads/geosite-base.dat \
-            https://github.com/hydraponique/roscomvpn-geosite/releases/latest/download/geosite.dat
-          echo "Downloaded base geosite.dat: $(du -h downloads/geosite-base.dat)"
-
-      - name: Fetch whitelist domains
-        run: python scripts/fetch_whitelist_domains.py
-
-      - name: Prepare GeoSite data
-        run: |
-          rm -rf geosite-builder/data
-          mkdir -p geosite-builder/data
-          
-          # Добавляем наши whitelist категории
-          cp data/whitelist-ru geosite-builder/data/
-          cp data/whitelist-ads geosite-builder/data/
-
-      - name: Build GeoSite with WHITELIST categories
-        working-directory: geosite-builder
-        run: |
-          mkdir -p ../output
-          go run ./ --datapath=./data --outputdir=../output
-          # v2fly/domain-list-community outputs dlc.dat
-          mv ../output/dlc.dat ../output/geosite-whitelist.dat
-
-      # === MERGE WITH BASE FILES ===
-      - name: Merge with base geosite.dat
-        run: |
-          # Concatenate base geosite.dat with our whitelist categories
-          # This works because protobuf repeated fields can be appended
-          cat downloads/geosite-base.dat output/geosite-whitelist.dat > output/geosite.dat
-          rm output/geosite-whitelist.dat
-
-      # === RELEASE ===
+          pip install -r requirements.txt
+      
       - name: Set release tag
+        id: tag
         run: |
-          RELEASE_TAG=$(date +%Y%m%d)
-          echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
-
+          TAG=$(date +'%Y%m%d')
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Release tag: $TAG"
+      
+      - name: Download source files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/fetch_sources.py
+      
+      - name: Parse whitelist data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/parse_whitelist.py
+      
+      - name: Merge categories into geoip.dat
+        run: |
+          python scripts/merge_geoip.py
+      
+      - name: Merge categories into geosite.dat
+        run: |
+          python scripts/merge_geosite.py
+      
       - name: Verify output files
         run: |
-          ls -lh output/
-          echo "geoip.dat size: $(du -h output/geoip.dat | cut -f1)"
-          echo "geosite.dat size: $(du -h output/geosite.dat | cut -f1)"
-
+          if [ ! -f output/geoip.dat ]; then
+            echo "ERROR: geoip.dat not found"
+            exit 1
+          fi
+          if [ ! -f output/geosite.dat ]; then
+            echo "ERROR: geosite.dat not found"
+            exit 1
+          fi
+          echo "geoip.dat size: $(stat -c%s output/geoip.dat) bytes"
+          echo "geosite.dat size: $(stat -c%s output/geosite.dat) bytes"
+      
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          name: Release ${{ env.RELEASE_TAG }}
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Release ${{ steps.tag.outputs.tag }}
           body: |
-            ## GeoIP & GeoSite с категориями Whitelist
+            # RU Whitelist Routing - Release ${{ steps.tag.outputs.tag }}
             
-            Релиз от **${{ env.RELEASE_TAG }}**
+            Автоматическая сборка `geoip.dat` и `geosite.dat` с дополнительными whitelist категориями из российских источников.
             
-            ### 📦 Включенные категории:
+            ## Категории
             
-            **geoip.dat:**
-            - Все категории от [hydraponique/roscomvpn-geoip](https://github.com/hydraponique/roscomvpn-geoip)
-            - `WHITELIST` - IP-адреса из kirilllavrov/RU-domain-list-for-whitelist
+            ### GeoIP
+            - **WHITELIST** - IP адреса из российских источников
             
-            **geosite.dat:**
-            - Все категории от [hydraponique/roscomvpn-geosite](https://github.com/hydraponique/roscomvpn-geosite)
-            - `WHITELIST-RU` - Российские домены
-            - `WHITELIST-ADS` - Рекламные домены
+            ### GeoSite
+            - **WHITELIST-RU** - Российские домены
+            - **WHITELIST-ADS** - Рекламные домены
             
-            ### 📥 Использование:
+            ## Использование
             
+            ### Xray/V2Ray
             ```json
-            // Xray/V2Ray
             {
               "routing": {
                 "rules": [
@@ -175,14 +114,43 @@ jobs:
             }
             ```
             
-            ### 🔗 Источники:
-            - [hydraponique/roscomvpn-geoip](https://github.com/hydraponique/roscomvpn-geoip)
-            - [hydraponique/roscomvpn-geosite](https://github.com/hydraponique/roscomvpn-geosite)
-            - [kirilllavrov/RU-domain-list-for-whitelist](https://github.com/kirilllavrov/RU-domain-list-for-whitelist)
+            ### Sing-box
+            ```json
+            {
+              "route": {
+                "rules": [
+                  {
+                    "geoip": "whitelist",
+                    "outbound": "direct"
+                  },
+                  {
+                    "geosite": ["whitelist-ru", "whitelist-ads"],
+                    "outbound": "direct"
+                  }
+                ]
+              }
+            }
+            ```
+            
+            ### Clash Meta
+            ```yaml
+            rules:
+              - GEOIP,WHITELIST,DIRECT
+              - GEOSITE,WHITELIST-RU,DIRECT
+              - GEOSITE,WHITELIST-ADS,DIRECT
+            ```
+            
+            ## Источники данных
+            
+            - GeoIP базовый файл: [hydraponique/roscomvpn-geoip](https://github.com/hydraponique/roscomvpn-geoip)
+            - GeoSite базовый файл: [hydraponique/roscomvpn-geosite](https://github.com/hydraponique/roscomvpn-geosite)
+            - Whitelist данные: [kirilllavrov/RU-domain-list-for-whitelist](https://github.com/kirilllavrov/RU-domain-list-for-whitelist)
+            
+            ---
+            
+            Дата сборки: ${{ steps.tag.outputs.tag }}
           files: |
             output/geoip.dat
             output/geosite.dat
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
