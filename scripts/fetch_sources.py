@@ -22,9 +22,15 @@ def get_latest_release_asset(repo, asset_name):
     """
     api_url = f"https://api.github.com/repos/{repo}/releases/latest"
     
+    # Use GitHub token if available
+    headers = {}
+    github_token = os.environ.get('GITHUB_TOKEN')
+    if github_token:
+        headers['Authorization'] = f'token {github_token}'
+    
     try:
         print(f"Fetching latest release from {repo}...", file=sys.stderr)
-        response = requests.get(api_url, timeout=30)
+        response = requests.get(api_url, headers=headers, timeout=30)
         response.raise_for_status()
         
         release_data = response.json()

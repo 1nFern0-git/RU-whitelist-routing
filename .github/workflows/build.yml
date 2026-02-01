@@ -41,10 +41,14 @@ jobs:
           echo "Release tag: $TAG"
       
       - name: Download source files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python scripts/fetch_sources.py
       
       - name: Parse whitelist data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python scripts/parse_whitelist.py
       

@@ -24,8 +24,14 @@ def fetch_github_file_content(repo, path, branch='main'):
     """
     raw_url = f"https://raw.githubusercontent.com/{repo}/{branch}/{path}"
     
+    # Use GitHub token if available for API calls
+    headers = {}
+    github_token = os.environ.get('GITHUB_TOKEN')
+    if github_token:
+        headers['Authorization'] = f'token {github_token}'
+    
     try:
-        response = requests.get(raw_url, timeout=30)
+        response = requests.get(raw_url, headers=headers, timeout=30)
         response.raise_for_status()
         return response.text
     except requests.exceptions.RequestException as e:
@@ -47,9 +53,15 @@ def fetch_github_directory_files(repo, path, branch='main'):
     """
     api_url = f"https://api.github.com/repos/{repo}/contents/{path}?ref={branch}"
     
+    # Use GitHub token if available
+    headers = {}
+    github_token = os.environ.get('GITHUB_TOKEN')
+    if github_token:
+        headers['Authorization'] = f'token {github_token}'
+    
     try:
         print(f"Fetching file list from {path}...", file=sys.stderr)
-        response = requests.get(api_url, timeout=30)
+        response = requests.get(api_url, headers=headers, timeout=30)
         response.raise_for_status()
         
         contents = response.json()
