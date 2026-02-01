@@ -56,12 +56,12 @@
     "rules": [
       {
         "type": "field",
-        "ip": ["geoip:whitelist"],
+        "ip": ["geoip:WHITELIST"],
         "outboundTag": "direct"
       },
       {
         "type": "field",
-        "domain": ["geosite:whitelist-ru", "geosite:whitelist-ads"],
+        "domain": ["geosite:WHITELIST-RU", "geosite:WHITELIST-ADS"],
         "outboundTag": "direct"
       }
     ]
@@ -78,11 +78,11 @@
   "route": {
     "rules": [
       {
-        "geoip": "whitelist",
+        "geoip": "WHITELIST",
         "outbound": "direct"
       },
       {
-        "geosite": ["whitelist-ru", "whitelist-ads"],
+        "geosite": ["WHITELIST-RU", "WHITELIST-ADS"],
         "outbound": "direct"
       }
     ],
