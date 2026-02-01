@@ -162,9 +162,21 @@ def main():
     whitelist_ads_entry = encode_geosite_entry('WHITELIST-ADS', ads_domain_entries)
     print(f"WHITELIST-ADS entry size: {len(whitelist_ads_entry)} bytes", file=sys.stderr)
     
+    # Wrap both entries with field tags for GeoSiteList.entry
+    wrapped_data = bytearray()
+    
+    # Wrap WHITELIST-RU
+    wrapped_data.append(0x0A)  # Field 1, wire type 2
+    wrapped_data.extend(write_varint(len(whitelist_ru_entry)))
+    wrapped_data.extend(whitelist_ru_entry)
+    
+    # Wrap WHITELIST-ADS
+    wrapped_data.append(0x0A)  # Field 1, wire type 2
+    wrapped_data.extend(write_varint(len(whitelist_ads_entry)))
+    wrapped_data.extend(whitelist_ads_entry)
+    
     # Combine original data with new entries
-    # In protobuf, repeated fields can just be appended
-    output_data = original_data + whitelist_ru_entry + whitelist_ads_entry
+    output_data = original_data + bytes(wrapped_data)
     
     # Write output file
     print(f"\nWriting to {geosite_output}...", file=sys.stderr)

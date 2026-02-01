@@ -192,9 +192,14 @@ def main():
     whitelist_entry = encode_geoip_entry('WHITELIST', cidrs)
     print(f"WHITELIST entry size: {len(whitelist_entry)} bytes", file=sys.stderr)
     
+    # Wrap entry with field tag for GeoIPList.entry (field 1, wire type 2)
+    wrapped_entry = bytearray()
+    wrapped_entry.append(0x0A)  # Field 1, wire type 2
+    wrapped_entry.extend(write_varint(len(whitelist_entry)))
+    wrapped_entry.extend(whitelist_entry)
+    
     # Combine original data with new entry
-    # In protobuf, repeated fields can just be appended
-    output_data = original_data + whitelist_entry
+    output_data = original_data + bytes(wrapped_entry)
     
     # Write output file
     print(f"Writing to {geoip_output}...", file=sys.stderr)
