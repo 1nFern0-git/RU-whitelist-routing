@@ -11,8 +11,8 @@
 - **WHITELIST-RU** (GeoSite) - Российские домены
 - **WHITELIST-ADS** (GeoSite) - Рекламные домены
 
-Скачать Latest файлы:
-[geoip.dat](https://github.com/1nFern0-git/RU-whitelist-routing/releases/latest/download/geoip.dat)
+Скачать Latest файлы:  
+[geoip.dat](https://github.com/1nFern0-git/RU-whitelist-routing/releases/latest/download/geoip.dat)  
 [geosite.dat](https://github.com/1nFern0-git/RU-whitelist-routing/releases/latest/download/geosite.dat)
 
 ## Использование
