@@ -1,4 +1,4 @@
-C{
+{
   "sources": {
     "geoip": {
       "repo": "hydraponique/roscomvpn-geoip",
