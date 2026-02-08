@@ -94,3 +94,30 @@ jobs:
             output/geosite.dat
           draft: false
           prerelease: false
+      
+      - name: Update LastUpdated timestamp
+        run: |
+          TIMESTAMP=$(date +%s)
+          python3 << 'EOF'
+          import json
+          
+          with open('JSON.DEFAULT', 'r', encoding='utf-8') as f:
+              data = json.load(f)
+          
+          data['LastUpdated'] = '${{ env.TIMESTAMP }}'
+          
+          with open('JSON.DEFAULT', 'w', encoding='utf-8') as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+          
+          print(f"Updated LastUpdated to {data['LastUpdated']}")
+          EOF
+        env:
+          TIMESTAMP: ${{ env.TIMESTAMP }}
+      
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add JSON.DEFAULT
+          git commit -m "chore: Update LastUpdated timestamp [${{ steps.tag.outputs.tag }}]" || echo "No changes to commit"
+          git push
