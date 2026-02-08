@@ -72,7 +72,28 @@ jobs:
           fi
           echo "geoip.dat size: $(stat -c%s output/geoip.dat) bytes"
           echo "geosite.dat size: $(stat -c%s output/geosite.dat) bytes"
-      
+          
+      - name: Update LastUpdated timestamp
+        id: timestamp
+        run: |
+          TIMESTAMP=$(date +%s)
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          python3 << 'EOF'
+          import json
+          
+          with open('JSON.DEFAULT', 'r', encoding='utf-8') as f:
+              data = json.load(f)
+          
+          data['LastUpdated'] = "$TIMESTAMP"
+          
+          with open('JSON.DEFAULT', 'w', encoding='utf-8') as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+          
+          print(f"Updated LastUpdated to $TIMESTAMP")
+          EOF
+        env:
+          TIMESTAMP: ${{ env.TIMESTAMP }}
+          
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -94,25 +115,6 @@ jobs:
             output/geosite.dat
           draft: false
           prerelease: false
-      
-      - name: Update LastUpdated timestamp
-        run: |
-          TIMESTAMP=$(date +%s)
-          python3 << 'EOF'
-          import json
-          
-          with open('JSON.DEFAULT', 'r', encoding='utf-8') as f:
-              data = json.load(f)
-          
-          data['LastUpdated'] = '${{ env.TIMESTAMP }}'
-          
-          with open('JSON.DEFAULT', 'w', encoding='utf-8') as f:
-              json.dump(data, f, indent=2, ensure_ascii=False)
-          
-          print(f"Updated LastUpdated to {data['LastUpdated']}")
-          EOF
-        env:
-          TIMESTAMP: ${{ env.TIMESTAMP }}
       
       - name: Commit and push changes
         run: |
