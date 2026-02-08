@@ -17,7 +17,7 @@
     "geoip": [
       {
         "name": "WHITELIST",
-        "source": "IPchecked"
+        "source": "IPs"
       }
     ],
     "geosite": [

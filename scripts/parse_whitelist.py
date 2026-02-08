@@ -165,7 +165,7 @@ def main():
     whitelist_repo = config['sources']['whitelist']['repo']
     whitelist_branch = config['sources']['whitelist']['branch']
     
-    # Process IP addresses from IPchecked directory
+    # Process IP addresses from IPs directory
     print("\n=== Processing IP addresses ===", file=sys.stderr)
     if not config['categories']['geoip']:
         print("ERROR: No geoip categories found in config", file=sys.stderr)
