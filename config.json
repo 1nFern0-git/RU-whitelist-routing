@@ -1,4 +1,4 @@
-{
+C{
   "sources": {
     "geoip": {
       "repo": "hydraponique/roscomvpn-geoip",
@@ -17,7 +17,7 @@
     "geoip": [
       {
         "name": "WHITELIST",
-        "source": "IPs"
+        "source": "IPchecked"
       }
     ],
     "geosite": [
