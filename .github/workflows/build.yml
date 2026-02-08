@@ -74,11 +74,9 @@ jobs:
           echo "geosite.dat size: $(stat -c%s output/geosite.dat) bytes"
           
       - name: Update LastUpdated timestamp
-        id: timestamp
         run: |
           TIMESTAMP=$(date +%s)
-          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
-          python3 << 'EOF'
+          python3 << EOF
           import json
           
           with open('JSON.DEFAULT', 'r', encoding='utf-8') as f:
@@ -91,8 +89,6 @@ jobs:
           
           print(f"Updated LastUpdated to $TIMESTAMP")
           EOF
-        env:
-          TIMESTAMP: ${{ env.TIMESTAMP }}
           
       - name: Create Release
         uses: softprops/action-gh-release@v2
