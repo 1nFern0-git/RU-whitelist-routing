@@ -139,6 +139,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add JSON.DEFAULT
+          git add JSON.DEFAULT HAPP_DEEPLINK
           git commit -m "chore: Update LastUpdated timestamp [${{ steps.tag.outputs.tag }}]" || echo "No changes to commit"
           git push
