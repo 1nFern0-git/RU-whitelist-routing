@@ -90,6 +90,29 @@ jobs:
           print(f"Updated LastUpdated to $TIMESTAMP")
           EOF
           
+- name: Generate HAPP deeplink (only if changed)
+  run: |
+    BASE64_CONFIG=$(base64 -w 0 JSON.DEFAULT)
+    NEW_LINK="happ://routing/onadd/${BASE64_CONFIG}"
+
+    # Если файла нет — создаём
+    if [ ! -f HAPP_DEEPLINK ]; then
+      echo "$NEW_LINK" > HAPP_DEEPLINK
+      echo "HAPP_DEEPLINK created"
+      exit 0
+    fi
+
+    # Считываем текущее содержимое
+    CURRENT_LINK=$(cat HAPP_DEEPLINK)
+
+    # Сравниваем
+    if [ "$CURRENT_LINK" != "$NEW_LINK" ]; then
+      echo "$NEW_LINK" > HAPP_DEEPLINK
+      echo "HAPP_DEEPLINK updated"
+    else
+      echo "No changes detected"
+    fi
+          
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
