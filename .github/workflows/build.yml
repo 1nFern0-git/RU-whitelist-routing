@@ -93,7 +93,7 @@ jobs:
       - name: Generate HAPP deeplink (only if changed)
         run: |
           BASE64_CONFIG=$(base64 -w 0 JSON.DEFAULT)
-          NEW_LINK="happ://routing/onadd/${BASE64_CONFIG}"
+          NEW_LINK="happ://routing/add/${BASE64_CONFIG}"
 
           # Если файла нет — создаём
           if [ ! -f HAPP_DEEPLINK ]; then
