@@ -29,7 +29,10 @@
     "geoip:direct"
   ],
   "ProxySites": [
-    "geosite:twitch-ads"
+    "geosite:github",
+    "geosite:twitch-ads",
+    "geosite:youtube",
+    "geosite:telegram"
   ],
   "ProxyIp": [],
   "BlockSites": [
