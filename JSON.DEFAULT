@@ -36,6 +36,7 @@
   ],
   "ProxyIp": [],
   "BlockSites": [
+    "geosite:win-spy",
     "geosite:category-ads"
   ],
   "BlockIp": [],
