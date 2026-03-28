@@ -15,6 +15,7 @@
   "DirectSites": [
     "geosite:private",
     "geosite:torrent",
+    "geosite:whitelist",
     "geosite:category-ru",
     "geosite:apple",
     "geosite:google-play",
