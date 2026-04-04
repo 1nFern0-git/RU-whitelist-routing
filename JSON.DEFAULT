@@ -10,7 +10,7 @@
   "DomesticDNSIP": "77.88.8.8",
   "Geoipurl": "https://github.com/1nFern0-git/RU-whitelist-routing/releases/latest/download/geoip.dat",
   "Geositeurl": "https://github.com/1nFern0-git/RU-whitelist-routing/releases/latest/download/geosite.dat",
-  "LastUpdated": "1775012288",
+  "LastUpdated": "1775270122",
   "DnsHosts": {},
   "DirectSites": [
     "geosite:private",
