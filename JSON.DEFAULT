@@ -11,7 +11,10 @@
   "Geoipurl": "https://github.com/1nFern0-git/RU-whitelist-routing/releases/latest/download/geoip.dat",
   "Geositeurl": "https://github.com/1nFern0-git/RU-whitelist-routing/releases/latest/download/geosite.dat",
   "LastUpdated": "1775530079",
-  "DnsHosts": {},
+  "DnsHosts": {
+    "lkfl2.nalog.ru": "213.24.64.175",
+    "lknpd.nalog.ru": "213.24.64.181"
+  },
   "DirectSites": [
     "geosite:private",
     "geosite:torrent",
@@ -19,6 +22,7 @@
     "geosite:category-ru",
     "geosite:apple",
     "geosite:google-play",
+    "geosite:origin",
     "geosite:riot",
     "geosite:escapefromtarkov",
     "geosite:twitch",
@@ -38,6 +42,7 @@
   "ProxyIp": [],
   "BlockSites": [
     "geosite:win-spy",
+    "geosite:torrent"
     "geosite:category-ads"
   ],
   "BlockIp": [],
