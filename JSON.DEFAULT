@@ -14,7 +14,7 @@
   "DnsHosts": {
     "lkfl2.nalog.ru": "213.24.64.175",
     "lknpd.nalog.ru": "213.24.64.181"
-  },
+              },
   "DirectSites": [
     "geosite:private",
     "geosite:torrent",
