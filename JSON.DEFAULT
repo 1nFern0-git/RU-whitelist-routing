@@ -42,7 +42,7 @@
   "ProxyIp": [],
   "BlockSites": [
     "geosite:win-spy",
-    "geosite:torrent"
+    "geosite:torrent",
     "geosite:category-ads"
   ],
   "BlockIp": [],
