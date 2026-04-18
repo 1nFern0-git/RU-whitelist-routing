@@ -21,7 +21,6 @@
     "geosite:whitelist",
     "geosite:category-ru",
     "geosite:apple",
-    "geosite:google-play",
     "geosite:origin",
     "geosite:riot",
     "geosite:escapefromtarkov",
@@ -34,6 +33,7 @@
     "geoip:direct"
   ],
   "ProxySites": [
+    "geosite:google-play",
     "geosite:github",
     "geosite:twitch-ads",
     "geosite:youtube",
