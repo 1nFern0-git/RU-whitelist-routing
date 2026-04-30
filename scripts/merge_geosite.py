@@ -130,9 +130,9 @@ def main():
         try:
             entry = create_domain_entry(domain, domain_type=2)
             ru_domain_entries.append(entry)
-        except Exception as e:
+        except UnicodeEncodeError as e:
             print(f"WARNING: Failed to encode domain {domain}: {e}", file=sys.stderr)
-    
+
     print(f"Created {len(ru_domain_entries)} domain entries", file=sys.stderr)
     
     # Encode WHITELIST-RU entry
@@ -153,9 +153,9 @@ def main():
         try:
             entry = create_domain_entry(domain, domain_type=2)
             ads_domain_entries.append(entry)
-        except Exception as e:
+        except UnicodeEncodeError as e:
             print(f"WARNING: Failed to encode domain {domain}: {e}", file=sys.stderr)
-    
+
     print(f"Created {len(ads_domain_entries)} domain entries", file=sys.stderr)
     
     # Encode WHITELIST-ADS entry

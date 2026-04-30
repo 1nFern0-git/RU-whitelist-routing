@@ -181,7 +181,7 @@ def main():
             ip_bytes, prefix = ip_to_bytes(ip_str)
             cidr_entry = create_cidr_entry(ip_bytes, prefix)
             cidrs.append(cidr_entry)
-        except Exception as e:
+        except ValueError as e:
             print(f"WARNING: Failed to parse IP {ip_str}: {e}", file=sys.stderr)
     
     print(f"Created {len(cidrs)} CIDR entries", file=sys.stderr)
