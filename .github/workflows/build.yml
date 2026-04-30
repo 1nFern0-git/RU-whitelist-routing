@@ -79,8 +79,33 @@ jobs:
           echo "geoip.dat size: $(stat -c%s output/geoip.dat) bytes"
           echo "geosite.dat size: $(stat -c%s output/geosite.dat) bytes"
 
-      - name: Update LastUpdated timestamp
+      - name: Check if output changed
+        id: check
         if: github.ref_name == 'main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p /tmp/prev_release
+          LATEST_TAG=$(gh release list --limit 1 --exclude-pre-releases --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
+          if [ -n "$LATEST_TAG" ] && gh release download "$LATEST_TAG" --pattern "*.dat" --dir /tmp/prev_release 2>/dev/null; then
+            OLD_GEOIP=$(sha256sum /tmp/prev_release/geoip.dat | cut -d' ' -f1)
+            OLD_GEOSITE=$(sha256sum /tmp/prev_release/geosite.dat | cut -d' ' -f1)
+            NEW_GEOIP=$(sha256sum output/geoip.dat | cut -d' ' -f1)
+            NEW_GEOSITE=$(sha256sum output/geosite.dat | cut -d' ' -f1)
+            if [ "$OLD_GEOIP" != "$NEW_GEOIP" ] || [ "$OLD_GEOSITE" != "$NEW_GEOSITE" ]; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "Data files changed"
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "Data files unchanged, skipping commit"
+            fi
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "No previous release found, treating as changed"
+          fi
+
+      - name: Update LastUpdated timestamp
+        if: github.ref_name == 'main' && steps.check.outputs.changed == 'true'
         run: |
           TIMESTAMP=$(date +%s)
           python3 << EOF
@@ -98,7 +123,7 @@ jobs:
           EOF
 
       - name: Generate HAPP deeplink (only if changed)
-        if: github.ref_name == 'main'
+        if: github.ref_name == 'main' && steps.check.outputs.changed == 'true'
         run: |
           BASE64_CONFIG=$(base64 -w 0 JSON.DEFAULT)
           NEW_LINK="happ://routing/add/${BASE64_CONFIG}"
@@ -144,7 +169,7 @@ jobs:
           prerelease: ${{ github.ref_name == 'dev' }}
 
       - name: Commit and push changes
-        if: github.ref_name == 'main'
+        if: github.ref_name == 'main' && steps.check.outputs.changed == 'true'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
