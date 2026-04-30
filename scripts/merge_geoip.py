@@ -5,8 +5,6 @@ merge_geoip.py - Merge whitelist IPs into geoip.dat (V2Ray protobuf format)
 import sys
 import os
 from pathlib import Path
-import struct
-
 
 def read_varint(data, offset):
     """
@@ -170,7 +168,7 @@ def main():
     
     # Read whitelist IPs
     print("Reading whitelist IPs...", file=sys.stderr)
-    with open(ips_file, 'r') as f:
+    with open(ips_file, 'r', encoding='utf-8') as f:
         ip_list = [line.strip() for line in f if line.strip()]
     
     print(f"Total IPs: {len(ip_list)}", file=sys.stderr)
