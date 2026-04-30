@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - dev
     paths-ignore:
       - "README.md"
       - "LICENSE"
@@ -36,7 +37,12 @@ jobs:
       - name: Set release tag
         id: tag
         run: |
-          TAG=$(date +'%Y%m%d')
+          BASE=$(date +'%Y%m%d')
+          if [ "${{ github.ref_name }}" = "dev" ]; then
+            TAG="dev-${BASE}"
+          else
+            TAG="${BASE}"
+          fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "Release tag: $TAG"
 
@@ -74,6 +80,7 @@ jobs:
           echo "geosite.dat size: $(stat -c%s output/geosite.dat) bytes"
 
       - name: Update LastUpdated timestamp
+        if: github.ref_name == 'main'
         run: |
           TIMESTAMP=$(date +%s)
           python3 << EOF
@@ -91,6 +98,7 @@ jobs:
           EOF
 
       - name: Generate HAPP deeplink (only if changed)
+        if: github.ref_name == 'main'
         run: |
           BASE64_CONFIG=$(base64 -w 0 JSON.DEFAULT)
           NEW_LINK="happ://routing/add/${BASE64_CONFIG}"
@@ -117,7 +125,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          name: Release ${{ steps.tag.outputs.tag }}
+          name: ${{ github.ref_name == 'dev' && 'Dev Release' || 'Release' }} ${{ steps.tag.outputs.tag }}
           body: |
             # Release ${{ steps.tag.outputs.tag }}
 
@@ -133,9 +141,10 @@ jobs:
             output/geoip.dat
             output/geosite.dat
           draft: false
-          prerelease: false
+          prerelease: ${{ github.ref_name == 'dev' }}
 
       - name: Commit and push changes
+        if: github.ref_name == 'main'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
