@@ -5,8 +5,6 @@ merge_geoip.py - Merge whitelist IPs into geoip.dat (V2Ray protobuf format)
 import sys
 import os
 from pathlib import Path
-import struct
-
 
 def read_varint(data, offset):
     """
@@ -170,7 +168,7 @@ def main():
     
     # Read whitelist IPs
     print("Reading whitelist IPs...", file=sys.stderr)
-    with open(ips_file, 'r') as f:
+    with open(ips_file, 'r', encoding='utf-8') as f:
         ip_list = [line.strip() for line in f if line.strip()]
     
     print(f"Total IPs: {len(ip_list)}", file=sys.stderr)
@@ -183,7 +181,7 @@ def main():
             ip_bytes, prefix = ip_to_bytes(ip_str)
             cidr_entry = create_cidr_entry(ip_bytes, prefix)
             cidrs.append(cidr_entry)
-        except Exception as e:
+        except ValueError as e:
             print(f"WARNING: Failed to parse IP {ip_str}: {e}", file=sys.stderr)
     
     print(f"Created {len(cidrs)} CIDR entries", file=sys.stderr)

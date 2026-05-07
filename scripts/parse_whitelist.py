@@ -153,7 +153,7 @@ def main():
     config_path = Path(__file__).parent.parent / 'config.json'
     
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
     except (IOError, json.JSONDecodeError) as e:
         print(f"ERROR: Failed to load config.json: {e}", file=sys.stderr)
@@ -191,7 +191,7 @@ def main():
     
     # Save IP addresses
     ip_output = data_dir / 'whitelist_ips.txt'
-    with open(ip_output, 'w') as f:
+    with open(ip_output, 'w', encoding='utf-8') as f:
         f.write('\n'.join(all_ips))
     
     print(f"\nTotal IPs: {len(all_ips)}", file=sys.stderr)
@@ -224,7 +224,7 @@ def main():
     
     # Save RU domains
     ru_output = data_dir / 'whitelist_ru_domains.txt'
-    with open(ru_output, 'w') as f:
+    with open(ru_output, 'w', encoding='utf-8') as f:
         f.write('\n'.join(all_ru_domains))
     
     print(f"\nTotal RU domains: {len(all_ru_domains)}", file=sys.stderr)
@@ -257,7 +257,7 @@ def main():
     
     # Save Ads domains
     ads_output = data_dir / 'whitelist_ads_domains.txt'
-    with open(ads_output, 'w') as f:
+    with open(ads_output, 'w', encoding='utf-8') as f:
         f.write('\n'.join(all_ads_domains))
     
     print(f"\nTotal Ads domains: {len(all_ads_domains)}", file=sys.stderr)

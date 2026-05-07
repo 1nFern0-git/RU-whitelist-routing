@@ -100,7 +100,7 @@ def main():
     config_path = Path(__file__).parent.parent / 'config.json'
     
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
     except (IOError, json.JSONDecodeError) as e:
         print(f"ERROR: Failed to load config.json: {e}", file=sys.stderr)

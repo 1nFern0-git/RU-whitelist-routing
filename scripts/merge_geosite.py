@@ -118,7 +118,7 @@ def main():
     
     # Read RU domains
     print("\nReading WHITELIST-RU domains...", file=sys.stderr)
-    with open(ru_domains_file, 'r') as f:
+    with open(ru_domains_file, 'r', encoding='utf-8') as f:
         ru_domains = [line.strip() for line in f if line.strip()]
     
     print(f"Total RU domains: {len(ru_domains)}", file=sys.stderr)
@@ -130,9 +130,9 @@ def main():
         try:
             entry = create_domain_entry(domain, domain_type=2)
             ru_domain_entries.append(entry)
-        except Exception as e:
+        except UnicodeEncodeError as e:
             print(f"WARNING: Failed to encode domain {domain}: {e}", file=sys.stderr)
-    
+
     print(f"Created {len(ru_domain_entries)} domain entries", file=sys.stderr)
     
     # Encode WHITELIST-RU entry
@@ -141,7 +141,7 @@ def main():
     
     # Read Ads domains
     print("\nReading WHITELIST-ADS domains...", file=sys.stderr)
-    with open(ads_domains_file, 'r') as f:
+    with open(ads_domains_file, 'r', encoding='utf-8') as f:
         ads_domains = [line.strip() for line in f if line.strip()]
     
     print(f"Total Ads domains: {len(ads_domains)}", file=sys.stderr)
@@ -153,9 +153,9 @@ def main():
         try:
             entry = create_domain_entry(domain, domain_type=2)
             ads_domain_entries.append(entry)
-        except Exception as e:
+        except UnicodeEncodeError as e:
             print(f"WARNING: Failed to encode domain {domain}: {e}", file=sys.stderr)
-    
+
     print(f"Created {len(ads_domain_entries)} domain entries", file=sys.stderr)
     
     # Encode WHITELIST-ADS entry
