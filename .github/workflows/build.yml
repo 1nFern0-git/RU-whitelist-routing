@@ -168,6 +168,42 @@ jobs:
           draft: false
           prerelease: ${{ github.ref_name == 'dev' }}
 
+      - name: Deploy to release branch (jsDelivr mirror)
+        if: github.ref_name == 'main' || github.ref_name == 'dev'
+        run: |
+          # Target branch: 'release' for main, 'release-dev' for dev
+          if [ "${{ github.ref_name }}" = "dev" ]; then
+            TARGET_BRANCH="release-dev"
+          else
+            TARGET_BRANCH="release"
+          fi
+          echo "Deploying to branch: $TARGET_BRANCH"
+
+          # Save dat files outside the worktree
+          cp output/geoip.dat /tmp/geoip.dat
+          cp output/geosite.dat /tmp/geosite.dat
+
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Create fresh orphan branch (no history, replaces existing)
+          git checkout --orphan release-tmp
+          git rm -rf . 2>/dev/null || true
+          git clean -fdx
+
+          # Add only the dat files
+          cp /tmp/geoip.dat geoip.dat
+          cp /tmp/geosite.dat geosite.dat
+          git add geoip.dat geosite.dat
+          git commit -m "release: ${{ steps.tag.outputs.tag }}"
+
+          # Force-push as target branch (replaces existing history)
+          git branch -M release-tmp "$TARGET_BRANCH"
+          git push --force origin "$TARGET_BRANCH"
+
+          # Return to source branch for any subsequent steps
+          git checkout "${{ github.ref_name }}"
+
       - name: Commit and push changes
         if: github.ref_name == 'main' && steps.check.outputs.changed == 'true'
         run: |
