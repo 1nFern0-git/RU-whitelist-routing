@@ -168,6 +168,30 @@ jobs:
           draft: false
           prerelease: ${{ github.ref_name == 'dev' }}
 
+      - name: Commit and push changes
+        if: github.ref_name == 'main'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add JSON.DEFAULT HAPP_DEEPLINK
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          if [ "${{ steps.check.outputs.changed }}" = "true" ]; then
+            MSG="chore: Update LastUpdated timestamp [${{ steps.tag.outputs.tag }}]"
+          else
+            MSG="chore: regenerate HAPP_DEEPLINK after JSON.DEFAULT change"
+          fi
+
+          git commit -m "$MSG"
+          git push
+
+      # NOTE: this step rewrites the working tree (git rm -rf . + git clean -fdx),
+      # so it must run AFTER the main-branch commit above. Otherwise it wipes the
+      # JSON.DEFAULT/HAPP_DEEPLINK edits before they get committed.
       - name: Deploy to release branch (jsDelivr mirror)
         if: github.ref_name == 'main' || github.ref_name == 'dev'
         run: |
@@ -203,24 +227,3 @@ jobs:
 
           # Return to source branch for any subsequent steps
           git checkout "${{ github.ref_name }}"
-
-      - name: Commit and push changes
-        if: github.ref_name == 'main'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add JSON.DEFAULT HAPP_DEEPLINK
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-
-          if [ "${{ steps.check.outputs.changed }}" = "true" ]; then
-            MSG="chore: Update LastUpdated timestamp [${{ steps.tag.outputs.tag }}]"
-          else
-            MSG="chore: regenerate HAPP_DEEPLINK after JSON.DEFAULT change"
-          fi
-
-          git commit -m "$MSG"
-          git push
