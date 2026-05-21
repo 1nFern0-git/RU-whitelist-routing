@@ -18,7 +18,7 @@
       {
         "name": "WHITELIST",
         "repo": "kirilllavrov/whitelists",
-        "file": "release/available_ips_from_IPs-all.txt"
+        "file": "release/IP-whitelist.txt"
       }
     ],
     "geosite": [
