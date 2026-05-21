@@ -10,7 +10,7 @@
   "DomesticDNSIP": "77.88.8.8",
   "Geoipurl": "https://raw.githubusercontent.com/1nFern0-git/RU-whitelist-routing/release/geoip.dat",
   "Geositeurl": "https://raw.githubusercontent.com/1nFern0-git/RU-whitelist-routing/release/geosite.dat",
-  "LastUpdated": "1779390758",
+  "LastUpdated": "1779391982",
   "DnsHosts": {
     "lkfl2.nalog.ru": "213.24.64.175",
     "lknpd.nalog.ru": "213.24.64.181"
@@ -19,6 +19,7 @@
     "geosite:private",
     "geosite:torrent",
     "geosite:whitelist",
+    "geosite:whitelist-ru",
     "geosite:category-ru",
     "geosite:apple",
     "geosite:origin",
