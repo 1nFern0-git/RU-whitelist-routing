@@ -33,6 +33,7 @@
     "geoip:direct"
   ],
   "ProxySites": [
+    "geosite:category-geoblock-ru"
     "geosite:google-play",
     "geosite:github",
     "geosite:twitch-ads",
