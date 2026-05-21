@@ -205,9 +205,9 @@ def main():
             raise KeyError(f"{name} category not found in config['categories'][{group!r}]")
         return matches[0]
 
-    # Process IP addresses (WHITELIST)
+    # Process IP addresses (WHITELIST-RU)
     print("\n=== Processing IP addresses ===", file=sys.stderr)
-    ip_category = find_category('geoip', 'WHITELIST')
+    ip_category = find_category('geoip', 'WHITELIST-RU')
     all_ips = []
     for content in collect_category_contents(ip_category, default_repo, default_branch):
         ips = parse_ip_addresses(content)

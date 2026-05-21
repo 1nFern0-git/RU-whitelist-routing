@@ -16,7 +16,7 @@
   "categories": {
     "geoip": [
       {
-        "name": "WHITELIST",
+        "name": "WHITELIST-RU",
         "repo": "kirilllavrov/whitelists",
         "file": "release/IP-whitelist.txt"
       }

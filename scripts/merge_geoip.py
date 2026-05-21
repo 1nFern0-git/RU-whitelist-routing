@@ -174,7 +174,7 @@ def main():
     print(f"Total IPs: {len(ip_list)}", file=sys.stderr)
     
     # Create CIDR entries for whitelist
-    print("Creating WHITELIST category...", file=sys.stderr)
+    print("Creating WHITELIST-RU category...", file=sys.stderr)
     cidrs = []
     for ip_str in ip_list:
         try:
@@ -186,9 +186,9 @@ def main():
     
     print(f"Created {len(cidrs)} CIDR entries", file=sys.stderr)
     
-    # Encode WHITELIST entry
-    whitelist_entry = encode_geoip_entry('WHITELIST', cidrs)
-    print(f"WHITELIST entry size: {len(whitelist_entry)} bytes", file=sys.stderr)
+    # Encode WHITELIST-RU entry
+    whitelist_entry = encode_geoip_entry('WHITELIST-RU', cidrs)
+    print(f"WHITELIST-RU entry size: {len(whitelist_entry)} bytes", file=sys.stderr)
     
     # Wrap entry with field tag for GeoIPList.entry (field 1, wire type 2)
     wrapped_entry = bytearray()
@@ -206,7 +206,7 @@ def main():
     
     print(f"\nOutput size: {len(output_data)} bytes", file=sys.stderr)
     print(f"Added: {len(whitelist_entry)} bytes", file=sys.stderr)
-    print(f"Successfully created geoip.dat with WHITELIST category!", file=sys.stderr)
+    print(f"Successfully created geoip.dat with WHITELIST-RU category!", file=sys.stderr)
     
     return 0
 

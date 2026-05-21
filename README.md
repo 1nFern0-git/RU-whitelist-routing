@@ -7,7 +7,7 @@
 
 ## Категории
 
-- **WHITELIST** (GeoIP) - IP адреса из российских источников
+- **WHITELIST-RU** (GeoIP) - IP адреса из российских источников
 - **WHITELIST-RU** (GeoSite) - Российские домены
 
 Скачать Latest файлы:
@@ -32,7 +32,7 @@
 {
   "routing": {
     "rules": [
-      {"type": "field", "ip": ["geoip:WHITELIST"], "outboundTag": "direct"},
+      {"type": "field", "ip": ["geoip:WHITELIST-RU"], "outboundTag": "direct"},
       {"type": "field", "domain": ["geosite:WHITELIST-RU"], "outboundTag": "direct"}
     ]
   }
@@ -45,7 +45,7 @@
 {
   "route": {
     "rules": [
-      {"geoip": "WHITELIST", "outbound": "direct"},
+      {"geoip": "WHITELIST-RU", "outbound": "direct"},
       {"geosite": ["WHITELIST-RU"], "outbound": "direct"}
     ]
   }
@@ -56,7 +56,7 @@
 
 ```yaml
 rules:
-  - GEOIP,WHITELIST,DIRECT
+  - GEOIP,WHITELIST-RU,DIRECT
   - GEOSITE,WHITELIST-RU,DIRECT
 ```
 
