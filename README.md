@@ -9,7 +9,6 @@
 
 - **WHITELIST** (GeoIP) - IP адреса из российских источников
 - **WHITELIST-RU** (GeoSite) - Российские домены
-- **WHITELIST-ADS** (GeoSite) - Рекламные домены
 
 Скачать Latest файлы:
 
@@ -34,7 +33,7 @@
   "routing": {
     "rules": [
       {"type": "field", "ip": ["geoip:WHITELIST"], "outboundTag": "direct"},
-      {"type": "field", "domain": ["geosite:WHITELIST-RU", "geosite:WHITELIST-ADS"], "outboundTag": "direct"}
+      {"type": "field", "domain": ["geosite:WHITELIST-RU"], "outboundTag": "direct"}
     ]
   }
 }
@@ -47,7 +46,7 @@
   "route": {
     "rules": [
       {"geoip": "WHITELIST", "outbound": "direct"},
-      {"geosite": ["WHITELIST-RU", "WHITELIST-ADS"], "outbound": "direct"}
+      {"geosite": ["WHITELIST-RU"], "outbound": "direct"}
     ]
   }
 }
@@ -59,7 +58,6 @@
 rules:
   - GEOIP,WHITELIST,DIRECT
   - GEOSITE,WHITELIST-RU,DIRECT
-  - GEOSITE,WHITELIST-ADS,DIRECT
 ```
 
 ## Локальная сборка
@@ -78,7 +76,7 @@ python scripts/merge_geosite.py
 
 - [hydraponique/roscomvpn-geoip](https://github.com/hydraponique/roscomvpn-geoip) - базовый GeoIP файл
 - [hydraponique/roscomvpn-geosite](https://github.com/hydraponique/roscomvpn-geosite) - базовый GeoSite файл
-- [kirilllavrov/RU-domain-list-for-whitelist](https://github.com/kirilllavrov/RU-domain-list-for-whitelist) - whitelist данные
+- [kirilllavrov/whitelists](https://github.com/kirilllavrov/whitelists) - whitelist данные (IP и RU-домены)
 
 ## Лицензия
 

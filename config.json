@@ -26,10 +26,6 @@
         "name": "WHITELIST-RU",
         "repo": "kirilllavrov/whitelists",
         "file": "release/whitelist.txt"
-      },
-      {
-        "name": "WHITELIST-ADS",
-        "source": "domains/ads"
       }
     ]
   },

@@ -159,7 +159,6 @@ jobs:
             **Категории:**
             - **WHITELIST** (GeoIP) - IP адреса
             - **WHITELIST-RU** (GeoSite) - Российские домены
-            - **WHITELIST-ADS** (GeoSite) - Рекламные домены
 
             **Использование:** см. [README](https://github.com/1nFern0-git/RU-whitelist-routing#readme)
           files: |

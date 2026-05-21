@@ -237,27 +237,10 @@ def main():
     print(f"\nTotal RU domains: {len(all_ru_domains)}", file=sys.stderr)
     print(f"Saved to: {ru_output}", file=sys.stderr)
 
-    # Process Ads domains (WHITELIST-ADS)
-    print("\n=== Processing Ads domains ===", file=sys.stderr)
-    ads_category = find_category('geosite', 'WHITELIST-ADS')
-    all_ads_domains = []
-    for content in collect_category_contents(ads_category, default_repo, default_branch):
-        domains = parse_domains(content)
-        all_ads_domains.extend(domains)
-        print(f"  Found {len(domains)} domains", file=sys.stderr)
-    all_ads_domains = sorted(set(all_ads_domains))
-
-    ads_output = data_dir / 'whitelist_ads_domains.txt'
-    with open(ads_output, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(all_ads_domains))
-    print(f"\nTotal Ads domains: {len(all_ads_domains)}", file=sys.stderr)
-    print(f"Saved to: {ads_output}", file=sys.stderr)
-    
     # Print summary
     print("\n=== Summary ===", file=sys.stderr)
     print(f"Total IPs: {len(all_ips)}", file=sys.stderr)
     print(f"Total RU domains: {len(all_ru_domains)}", file=sys.stderr)
-    print(f"Total Ads domains: {len(all_ads_domains)}", file=sys.stderr)
     
     return 0
 
