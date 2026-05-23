@@ -16,18 +16,16 @@
   "categories": {
     "geoip": [
       {
-        "name": "WHITELIST",
-        "source": "IPchecked"
+        "name": "WHITELIST-RU",
+        "repo": "kirilllavrov/whitelists",
+        "file": "release/IP-whitelist.txt"
       }
     ],
     "geosite": [
       {
         "name": "WHITELIST-RU",
-        "source": "domains/ru"
-      },
-      {
-        "name": "WHITELIST-ADS",
-        "source": "domains/ads"
+        "repo": "kirilllavrov/whitelists",
+        "file": "release/whitelist.txt"
       }
     ]
   },

@@ -157,9 +157,8 @@ jobs:
             `geoip.dat` и `geosite.dat` с whitelist категориями из российских источников.
 
             **Категории:**
-            - **WHITELIST** (GeoIP) - IP адреса
+            - **WHITELIST-RU** (GeoIP) - Российские IP адреса
             - **WHITELIST-RU** (GeoSite) - Российские домены
-            - **WHITELIST-ADS** (GeoSite) - Рекламные домены
 
             **Использование:** см. [README](https://github.com/1nFern0-git/RU-whitelist-routing#readme)
           files: |

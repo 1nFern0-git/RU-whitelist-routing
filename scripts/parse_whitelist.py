@@ -76,6 +76,40 @@ def fetch_github_directory_files(repo, path, branch='main'):
         return []
 
 
+def category_repo(category, default_repo, default_branch):
+    """Resolve the (repo, branch) pair for a category, falling back to defaults."""
+    return category.get('repo', default_repo), category.get('branch', default_branch)
+
+
+def collect_category_contents(category, default_repo, default_branch):
+    """
+    Fetch raw text content(s) for a category. Supports two modes:
+    - 'file': single file at category['file']
+    - 'source': directory listing; fetches every file inside category['source']
+    """
+    repo, branch = category_repo(category, default_repo, default_branch)
+
+    if 'file' in category:
+        file_path = category['file']
+        print(f"Processing {repo}:{file_path}...", file=sys.stderr)
+        content = fetch_github_file_content(repo, file_path, branch)
+        return [content] if content else []
+
+    if 'source' in category:
+        dir_path = category['source']
+        filenames = fetch_github_directory_files(repo, dir_path, branch)
+        contents = []
+        for filename in filenames:
+            file_path = f"{dir_path}/{filename}"
+            print(f"Processing {file_path}...", file=sys.stderr)
+            content = fetch_github_file_content(repo, file_path, branch)
+            if content:
+                contents.append(content)
+        return contents
+
+    raise ValueError(f"Category {category.get('name')!r} has neither 'file' nor 'source'")
+
+
 def parse_ip_addresses(content):
     """
     Parse and validate IP addresses from content
@@ -162,112 +196,51 @@ def main():
     data_dir = Path(__file__).parent.parent / 'data'
     data_dir.mkdir(parents=True, exist_ok=True)
     
-    whitelist_repo = config['sources']['whitelist']['repo']
-    whitelist_branch = config['sources']['whitelist']['branch']
-    
-    # Process IP addresses from IPs directory
+    default_repo = config['sources']['whitelist']['repo']
+    default_branch = config['sources']['whitelist']['branch']
+
+    def find_category(group, name):
+        matches = [cat for cat in config['categories'][group] if cat['name'] == name]
+        if not matches:
+            raise KeyError(f"{name} category not found in config['categories'][{group!r}]")
+        return matches[0]
+
+    # Process IP addresses (WHITELIST-RU)
     print("\n=== Processing IP addresses ===", file=sys.stderr)
-    if not config['categories']['geoip']:
-        print("ERROR: No geoip categories found in config", file=sys.stderr)
-        return 1
-    ip_category = config['categories']['geoip'][0]
-    ip_source_path = ip_category['source']
-    
-    ip_files = fetch_github_directory_files(whitelist_repo, ip_source_path, whitelist_branch)
-    
+    ip_category = find_category('geoip', 'WHITELIST-RU')
     all_ips = []
-    for filename in ip_files:
-        file_path = f"{ip_source_path}/{filename}"
-        print(f"Processing {file_path}...", file=sys.stderr)
-        
-        content = fetch_github_file_content(whitelist_repo, file_path, whitelist_branch)
-        if content:
-            ips = parse_ip_addresses(content)
-            all_ips.extend(ips)
-            print(f"  Found {len(ips)} IPs", file=sys.stderr)
-    
-    # Remove duplicates and sort
+    for content in collect_category_contents(ip_category, default_repo, default_branch):
+        ips = parse_ip_addresses(content)
+        all_ips.extend(ips)
+        print(f"  Found {len(ips)} IPs", file=sys.stderr)
     all_ips = sorted(set(all_ips))
-    
-    # Save IP addresses
+
     ip_output = data_dir / 'whitelist_ips.txt'
     with open(ip_output, 'w', encoding='utf-8') as f:
         f.write('\n'.join(all_ips))
-    
     print(f"\nTotal IPs: {len(all_ips)}", file=sys.stderr)
     print(f"Saved to: {ip_output}", file=sys.stderr)
-    
-    # Process RU domains
+
+    # Process RU domains (WHITELIST-RU)
     print("\n=== Processing RU domains ===", file=sys.stderr)
-    ru_categories = [cat for cat in config['categories']['geosite'] if cat['name'] == 'WHITELIST-RU']
-    if not ru_categories:
-        print("ERROR: WHITELIST-RU category not found in config", file=sys.stderr)
-        return 1
-    ru_category = ru_categories[0]
-    ru_source_path = ru_category['source']
-    
-    ru_files = fetch_github_directory_files(whitelist_repo, ru_source_path, whitelist_branch)
-    
+    ru_category = find_category('geosite', 'WHITELIST-RU')
     all_ru_domains = []
-    for filename in ru_files:
-        file_path = f"{ru_source_path}/{filename}"
-        print(f"Processing {file_path}...", file=sys.stderr)
-        
-        content = fetch_github_file_content(whitelist_repo, file_path, whitelist_branch)
-        if content:
-            domains = parse_domains(content)
-            all_ru_domains.extend(domains)
-            print(f"  Found {len(domains)} domains", file=sys.stderr)
-    
-    # Remove duplicates and sort
+    for content in collect_category_contents(ru_category, default_repo, default_branch):
+        domains = parse_domains(content)
+        all_ru_domains.extend(domains)
+        print(f"  Found {len(domains)} domains", file=sys.stderr)
     all_ru_domains = sorted(set(all_ru_domains))
-    
-    # Save RU domains
+
     ru_output = data_dir / 'whitelist_ru_domains.txt'
     with open(ru_output, 'w', encoding='utf-8') as f:
         f.write('\n'.join(all_ru_domains))
-    
     print(f"\nTotal RU domains: {len(all_ru_domains)}", file=sys.stderr)
     print(f"Saved to: {ru_output}", file=sys.stderr)
-    
-    # Process Ads domains
-    print("\n=== Processing Ads domains ===", file=sys.stderr)
-    ads_categories = [cat for cat in config['categories']['geosite'] if cat['name'] == 'WHITELIST-ADS']
-    if not ads_categories:
-        print("ERROR: WHITELIST-ADS category not found in config", file=sys.stderr)
-        return 1
-    ads_category = ads_categories[0]
-    ads_source_path = ads_category['source']
-    
-    ads_files = fetch_github_directory_files(whitelist_repo, ads_source_path, whitelist_branch)
-    
-    all_ads_domains = []
-    for filename in ads_files:
-        file_path = f"{ads_source_path}/{filename}"
-        print(f"Processing {file_path}...", file=sys.stderr)
-        
-        content = fetch_github_file_content(whitelist_repo, file_path, whitelist_branch)
-        if content:
-            domains = parse_domains(content)
-            all_ads_domains.extend(domains)
-            print(f"  Found {len(domains)} domains", file=sys.stderr)
-    
-    # Remove duplicates and sort
-    all_ads_domains = sorted(set(all_ads_domains))
-    
-    # Save Ads domains
-    ads_output = data_dir / 'whitelist_ads_domains.txt'
-    with open(ads_output, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(all_ads_domains))
-    
-    print(f"\nTotal Ads domains: {len(all_ads_domains)}", file=sys.stderr)
-    print(f"Saved to: {ads_output}", file=sys.stderr)
-    
+
     # Print summary
     print("\n=== Summary ===", file=sys.stderr)
     print(f"Total IPs: {len(all_ips)}", file=sys.stderr)
     print(f"Total RU domains: {len(all_ru_domains)}", file=sys.stderr)
-    print(f"Total Ads domains: {len(all_ads_domains)}", file=sys.stderr)
     
     return 0
 
