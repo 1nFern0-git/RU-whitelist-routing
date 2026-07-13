@@ -122,8 +122,14 @@ def main():
     print("Creating WHITELIST-RU category...", file=sys.stderr)
     ru_domain_entries = []
     for domain in ru_domains:
+        # 'full:' prefix means exact match (type 3) instead of the
+        # default root-domain/subdomain match (type 2)
+        domain_type = 2
+        if domain.startswith('full:'):
+            domain_type = 3
+            domain = domain[5:]
         try:
-            entry = create_domain_entry(domain, domain_type=2)
+            entry = create_domain_entry(domain, domain_type=domain_type)
             ru_domain_entries.append(entry)
         except UnicodeEncodeError as e:
             print(f"WARNING: Failed to encode domain {domain}: {e}", file=sys.stderr)

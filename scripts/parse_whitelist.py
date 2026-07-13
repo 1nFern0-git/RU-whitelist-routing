@@ -145,16 +145,21 @@ def parse_ip_addresses(content):
 
 def parse_domains(content):
     """
-    Parse domains from content, removing 'domain:' prefix if present
-    
+    Parse domains from content, removing 'domain:' prefix if present.
+    A 'full:' prefix (exact match, no subdomains) is preserved in the
+    output so downstream (merge_geosite.py) can pick the right Domain
+    Rule type - it is otherwise dropped by the validation regex below,
+    which silently discards the whole entry (colon isn't a valid domain
+    char).
+
     Args:
         content: Text content containing domains
-        
+
     Returns:
-        List of domain names
+        List of domain names (optionally prefixed with 'full:')
     """
     domains = []
-    
+
     # Domain validation pattern (basic but proper)
     # Allows letters, numbers, hyphens, and dots
     # Must start with alphanumeric, end with alphanumeric
@@ -162,22 +167,26 @@ def parse_domains(content):
     domain_pattern = re.compile(
         r'^(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
     )
-    
+
     for line in content.splitlines():
         line = line.strip()
-        
+
         # Skip empty lines and comments
         if not line or line.startswith('#') or line.startswith('//'):
             continue
-        
-        # Remove 'domain:' prefix if present
+
+        # Remove 'domain:'/'full:' prefix if present, keeping track of it
+        prefix = ''
         if line.startswith('domain:'):
             line = line[7:].strip()
-        
+        elif line.startswith('full:'):
+            prefix = 'full:'
+            line = line[5:].strip()
+
         # Validate domain format
         if line and domain_pattern.match(line):
-            domains.append(line)
-    
+            domains.append(prefix + line)
+
     return domains
 
 
