@@ -9,7 +9,7 @@
       "asset": "geosite.dat"
     },
     "whitelist": {
-      "repo": "kirilllavrov/RU-domain-list-for-whitelist",
+      "repo": "kirilllavrov/whitelists",
       "branch": "main"
     }
   },
@@ -17,14 +17,12 @@
     "geoip": [
       {
         "name": "WHITELIST-RU",
-        "repo": "kirilllavrov/whitelists",
         "file": "release/IP-whitelist.txt"
       }
     ],
     "geosite": [
       {
         "name": "WHITELIST-RU",
-        "repo": "kirilllavrov/whitelists",
         "file": "release/whitelist.txt"
       }
     ]

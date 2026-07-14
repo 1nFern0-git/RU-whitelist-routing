@@ -3,7 +3,7 @@
 merge_geoip.py - Merge whitelist IPs into geoip.dat (V2Ray protobuf format)
 """
 import sys
-import os
+import ipaddress
 from pathlib import Path
 
 def read_varint(data, offset):
@@ -61,27 +61,25 @@ def write_varint(value):
 
 def ip_to_bytes(ip_str):
     """
-    Convert IP address string to bytes
-    
+    Convert an IPv4/IPv6 address or CIDR to packed bytes + prefix length.
+
+    IPv4 addresses yield 4 bytes, IPv6 addresses yield 16 bytes - both are
+    valid CIDR.ip encodings in the V2Ray GeoIP protobuf. Host bits in a
+    network are zeroed (strict=False).
+
     Args:
-        ip_str: IP address as string (e.g., "192.168.1.1" or "192.168.1.0/24")
-        
+        ip_str: IP/CIDR string (e.g. "192.168.1.0/24" or "2001:db8::/32")
+
     Returns:
         Tuple of (ip_bytes, prefix)
     """
-    # Split IP and prefix
     if '/' in ip_str:
-        ip_part, prefix_str = ip_str.split('/')
-        prefix = int(prefix_str)
-    else:
-        ip_part = ip_str
-        prefix = 32  # Default /32 for single IP
-    
-    # Convert IP to bytes
-    parts = ip_part.split('.')
-    ip_bytes = bytes([int(p) for p in parts])
-    
-    return ip_bytes, prefix
+        net = ipaddress.ip_network(ip_str, strict=False)
+        return net.network_address.packed, net.prefixlen
+
+    addr = ipaddress.ip_address(ip_str)
+    prefix = 32 if addr.version == 4 else 128  # single-host default
+    return addr.packed, prefix
 
 
 def create_cidr_entry(ip, prefix):
