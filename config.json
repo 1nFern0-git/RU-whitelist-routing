@@ -4,9 +4,10 @@
       "repo": "hydraponique/roscomvpn-geoip",
       "asset": "geoip.dat"
     },
-    "geosite": {
+    "geosite_data": {
       "repo": "hydraponique/roscomvpn-geosite",
-      "asset": "geosite.dat"
+      "branch": "master",
+      "path": "data"
     },
     "whitelist": {
       "repo": "kirilllavrov/whitelists",
@@ -26,6 +27,10 @@
         "file": "release/whitelist.txt"
       }
     ]
+  },
+  "validation": {
+    "min_count_for_drop_check": 50,
+    "max_category_drop_pct": 20
   },
   "release": {
     "schedule": "0 0 */3 * *",

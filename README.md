@@ -60,14 +60,41 @@ rules:
   - GEOSITE,WHITELIST-RU,DIRECT
 ```
 
+## Кастомизация (include / exclude)
+
+Можно **добавлять** или **удалять** отдельные IP/домены в любой категории через
+списки в каталоге [`custom/`](custom/), не трогая исходники. Имя файла = имя
+категории:
+
+```
+custom/geoip/include/<категория>.txt    # добавить IP/CIDR
+custom/geoip/exclude/<категория>.txt    # удалить IP/CIDR (точное вычитание диапазона)
+custom/geosite/include/<категория>.txt  # добавить доменное правило
+custom/geosite/exclude/<категория>.txt  # удалить доменное правило
+```
+
+Подробности синтаксиса и правил валидации — в [custom/README.md](custom/README.md).
+
 ## Локальная сборка
+
+`geoip.dat` собирается на Python. `geosite.dat` собирается из исходников
+сборщиком [v2fly/domain-list-community](https://github.com/v2fly/domain-list-community)
+(нужен Go).
 
 ```bash
 pip install -r requirements.txt
-python scripts/fetch_sources.py
-python scripts/parse_whitelist.py
-python scripts/merge_geoip.py
-python scripts/merge_geosite.py
+python scripts/fetch_sources.py            # скачать geoip.dat
+python scripts/parse_whitelist.py          # получить whitelist IP/домены
+python scripts/patch_geoip.py              # -> output/geoip.dat (WHITELIST-RU + overlays)
+python scripts/build_geosite_data.py       # -> downloads/geosite-data/ (исходники + overlays)
+
+# geosite.dat: скомпилировать подготовленное дерево сборщиком v2fly
+git clone --depth 1 https://github.com/v2fly/domain-list-community community
+cp -a downloads/geosite-data/. community/data/
+(cd community && go run ./ -outputdir=/tmp/out)
+cp /tmp/out/dlc.dat output/geosite.dat
+
+python scripts/validate_build.py           # проверка инвариантов
 ```
 
 Результаты в `output/geoip.dat` и `output/geosite.dat`.
@@ -75,7 +102,8 @@ python scripts/merge_geosite.py
 ## Источники
 
 - [hydraponique/roscomvpn-geoip](https://github.com/hydraponique/roscomvpn-geoip) - базовый GeoIP файл
-- [hydraponique/roscomvpn-geosite](https://github.com/hydraponique/roscomvpn-geosite) - базовый GeoSite файл
+- [hydraponique/roscomvpn-geosite](https://github.com/hydraponique/roscomvpn-geosite) - исходники GeoSite категорий (`data/`)
+- [v2fly/domain-list-community](https://github.com/v2fly/domain-list-community) - сборщик geosite.dat
 - [kirilllavrov/whitelists](https://github.com/kirilllavrov/whitelists) - whitelist данные (IP и RU-домены)
 
 ## Лицензия
