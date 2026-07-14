@@ -3,7 +3,6 @@
 merge_geosite.py - Merge whitelist domains into geosite.dat (V2Ray protobuf format)
 """
 import sys
-import os
 from pathlib import Path
 
 

@@ -6,6 +6,7 @@ import sys
 import os
 import json
 import re
+import ipaddress
 import requests
 from pathlib import Path
 
@@ -112,45 +113,91 @@ def collect_category_contents(category, default_repo, default_branch):
 
 def parse_ip_addresses(content):
     """
-    Parse and validate IP addresses from content
-    
+    Parse and validate IP addresses from content (IPv4 and IPv6)
+
+    Accepts single addresses ("1.2.3.4", "2001:db8::1") and CIDR ranges
+    ("1.2.3.0/24", "2001:db8::/32"). Validation is delegated to the
+    stdlib ``ipaddress`` module so both families are handled uniformly.
+
     Args:
         content: Text content containing IP addresses
-        
+
     Returns:
-        List of valid IP addresses
+        List of valid IP address / CIDR strings (original textual form)
     """
     ips = []
-    
-    # IP address pattern with proper octet validation (0-255)
-    ip_pattern = re.compile(
-        r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}'
-        r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
-        r'(?:/(?:3[0-2]|[1-2]?[0-9]))?$'
-    )
-    
+
     for line in content.splitlines():
         line = line.strip()
-        
+
         # Skip empty lines and comments
         if not line or line.startswith('#') or line.startswith('//'):
             continue
-        
-        # Validate IP format
-        if ip_pattern.match(line):
-            ips.append(line)
-    
+
+        try:
+            if '/' in line:
+                ipaddress.ip_network(line, strict=False)
+            else:
+                ipaddress.ip_address(line)
+        except ValueError:
+            continue
+
+        ips.append(line)
+
     return ips
+
+
+# Validation pattern applied to the ASCII/punycode form of a domain.
+# The TLD label may be an ACE ("xn--") label, so digits and hyphens are
+# permitted there as well - Cyrillic zones like .рф become .xn--p1ai.
+_ASCII_DOMAIN_RE = re.compile(
+    r'^(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z0-9\-]{2,}$'
+)
+
+
+def normalize_domain(name):
+    """
+    Normalize a domain to its ASCII/punycode (IDNA) form.
+
+    Internationalized domains (e.g. 'мвд.рф') are converted to their ACE
+    representation ('xn--b1aew.xn--p1ai') so they match how clients send
+    the SNI/DNS name on the wire and how canonical geosite.dat files store
+    them. Returns None if the value is not a valid hostname.
+
+    Args:
+        name: Raw domain string (may contain non-ASCII characters)
+
+    Returns:
+        ASCII/punycode domain string, or None if invalid
+    """
+    name = name.strip().rstrip('.').lower()
+    if not name:
+        return None
+
+    try:
+        # The stdlib 'idna' codec performs ToASCII per label. Already-ASCII
+        # (incl. existing 'xn--') labels pass through unchanged.
+        ascii_name = name.encode('idna').decode('ascii')
+    except (UnicodeError, ValueError):
+        # idna rejects some otherwise-valid ASCII hostnames (e.g. numeric
+        # labels); keep those, but drop anything still non-ASCII.
+        try:
+            name.encode('ascii')
+        except UnicodeEncodeError:
+            return None
+        ascii_name = name
+
+    return ascii_name if _ASCII_DOMAIN_RE.match(ascii_name) else None
 
 
 def parse_domains(content):
     """
     Parse domains from content, removing 'domain:' prefix if present.
+
     A 'full:' prefix (exact match, no subdomains) is preserved in the
     output so downstream (merge_geosite.py) can pick the right Domain
-    Rule type - it is otherwise dropped by the validation regex below,
-    which silently discards the whole entry (colon isn't a valid domain
-    char).
+    Rule type. Internationalized domains are converted to punycode via
+    normalize_domain().
 
     Args:
         content: Text content containing domains
@@ -159,14 +206,6 @@ def parse_domains(content):
         List of domain names (optionally prefixed with 'full:')
     """
     domains = []
-
-    # Domain validation pattern (basic but proper)
-    # Allows letters, numbers, hyphens, and dots
-    # Must start with alphanumeric, end with alphanumeric
-    # Must have at least one dot
-    domain_pattern = re.compile(
-        r'^(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
-    )
 
     for line in content.splitlines():
         line = line.strip()
@@ -183,9 +222,9 @@ def parse_domains(content):
             prefix = 'full:'
             line = line[5:].strip()
 
-        # Validate domain format
-        if line and domain_pattern.match(line):
-            domains.append(prefix + line)
+        ascii_domain = normalize_domain(line)
+        if ascii_domain:
+            domains.append(prefix + ascii_domain)
 
     return domains
 
