@@ -120,20 +120,11 @@ def main():
     if not download_file(geoip_url, downloads_dir / 'geoip.dat'):
         print("ERROR: Failed to download geoip.dat", file=sys.stderr)
         return 1
-    
-    # Download geosite.dat
-    geosite_config = config['sources']['geosite']
-    geosite_url = get_latest_release_asset(geosite_config['repo'], geosite_config['asset'])
-    
-    if not geosite_url:
-        print("ERROR: Failed to get geosite.dat URL", file=sys.stderr)
-        return 1
-    
-    if not download_file(geosite_url, downloads_dir / 'geosite.dat'):
-        print("ERROR: Failed to download geosite.dat", file=sys.stderr)
-        return 1
-    
-    print("\nAll source files downloaded successfully!", file=sys.stderr)
+
+    # geosite.dat is no longer downloaded: it is rebuilt from sources by
+    # build_geosite_data.py + the v2fly/domain-list-community builder.
+
+    print("\nSource files downloaded successfully!", file=sys.stderr)
     return 0
 
 

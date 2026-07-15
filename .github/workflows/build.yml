@@ -24,6 +24,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Checkout geosite builder
+        uses: actions/checkout@v7
+        with:
+          repository: v2fly/domain-list-community
+          path: community
+          fetch-depth: 1
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: community/go.mod
+          cache: true
+          cache-dependency-path: community/go.sum
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -46,6 +60,18 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "Release tag: $TAG"
 
+      - name: Download previous release (for validation & change check)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p /tmp/prev_release
+          LATEST_TAG=$(gh release list --limit 1 --exclude-pre-releases --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
+          if [ -n "$LATEST_TAG" ] && gh release download "$LATEST_TAG" --pattern "*.dat" --dir /tmp/prev_release 2>/dev/null; then
+            echo "Downloaded previous release: $LATEST_TAG"
+          else
+            echo "No previous release found"
+          fi
+
       - name: Download source files
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -58,13 +84,35 @@ jobs:
         run: |
           python scripts/parse_whitelist.py
 
-      - name: Merge categories into geoip.dat
+      - name: Patch geoip.dat (WHITELIST-RU + overlays)
         run: |
-          python scripts/merge_geoip.py
+          python scripts/patch_geoip.py
 
-      - name: Merge categories into geosite.dat
+      - name: Assemble geosite source tree (whitelist-ru + overlays)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/merge_geosite.py
+          python scripts/build_geosite_data.py
+
+      - name: Build geosite.dat from sources
+        run: |
+          set -euo pipefail
+          rm -rf community/data /tmp/geosite-out
+          mkdir -p community/data /tmp/geosite-out
+          cp -a downloads/geosite-data/. community/data/
+          pushd community >/dev/null
+          go run ./ -outputdir=/tmp/geosite-out
+          popd >/dev/null
+          test -s /tmp/geosite-out/dlc.dat
+          mkdir -p output
+          cp -f /tmp/geosite-out/dlc.dat output/geosite.dat
+          echo "geosite.dat size: $(stat -c%s output/geosite.dat) bytes"
+
+      - name: Validate build (post-build invariants)
+        env:
+          PREV_RELEASE_DIR: /tmp/prev_release
+        run: |
+          python scripts/validate_build.py
 
       - name: Verify output files
         run: |
@@ -82,12 +130,8 @@ jobs:
       - name: Check if output changed
         id: check
         if: github.ref_name == 'main'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p /tmp/prev_release
-          LATEST_TAG=$(gh release list --limit 1 --exclude-pre-releases --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
-          if [ -n "$LATEST_TAG" ] && gh release download "$LATEST_TAG" --pattern "*.dat" --dir /tmp/prev_release 2>/dev/null; then
+          if [ -f /tmp/prev_release/geoip.dat ] && [ -f /tmp/prev_release/geosite.dat ]; then
             OLD_GEOIP=$(sha256sum /tmp/prev_release/geoip.dat | cut -d' ' -f1)
             OLD_GEOSITE=$(sha256sum /tmp/prev_release/geosite.dat | cut -d' ' -f1)
             NEW_GEOIP=$(sha256sum output/geoip.dat | cut -d' ' -f1)
