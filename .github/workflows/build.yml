@@ -211,6 +211,44 @@ jobs:
           draft: false
           prerelease: ${{ github.ref_name == 'dev' }}
 
+      # Second public mirror: Yandex Object Storage (stable direct URLs,
+      # independent of GitHub reachability). Must run BEFORE the release-branch
+      # step below, which wipes the worktree (git rm -rf . + git clean -fdx).
+      - name: Mirror to Yandex Object Storage
+        if: github.ref_name == 'main'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.YC_STORAGE_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.YC_STORAGE_SECRET }}
+          AWS_DEFAULT_REGION: ru-central1
+          BUCKET: geo-freenternet
+        run: |
+          set -euo pipefail
+
+          if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+            echo "::warning::YC_STORAGE_KEY_ID/YC_STORAGE_SECRET not set, skipping Yandex mirror"
+            exit 0
+          fi
+
+          for f in geoip.dat geosite.dat; do
+            aws --endpoint-url=https://storage.yandexcloud.net \
+              s3 cp "output/$f" "s3://$BUCKET/$f" \
+              --content-type application/octet-stream \
+              --cache-control "public, max-age=300" \
+              --no-progress
+          done
+
+          # Verify the public URL actually serves what we just built.
+          for f in geoip.dat geosite.dat; do
+            LOCAL=$(sha256sum "output/$f" | cut -d' ' -f1)
+            REMOTE=$(curl -fsSL --retry 3 -H 'Cache-Control: no-cache' \
+              "https://$BUCKET.storage.yandexcloud.net/$f" | sha256sum | cut -d' ' -f1)
+            if [ "$LOCAL" != "$REMOTE" ]; then
+              echo "::error::Yandex mirror mismatch for $f (local $LOCAL != remote $REMOTE)"
+              exit 1
+            fi
+            echo "$f mirrored OK ($LOCAL)"
+          done
+
       - name: Commit and push changes
         if: github.ref_name == 'main'
         run: |
