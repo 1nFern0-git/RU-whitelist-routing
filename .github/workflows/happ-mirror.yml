@@ -1,0 +1,96 @@
+name: Mirror Happ installers
+
+# Mirrors the latest Happ release assets (Android APK, Windows x64 installer)
+# into Yandex Object Storage, so the subscription page can link to stable
+# direct URLs reachable from Russia:
+#   https://geo-freenternet.storage.yandexcloud.net/Happ.apk
+#   https://geo-freenternet.storage.yandexcloud.net/setup-Happ.x64.exe
+# The mirrored release tag is kept in object metadata (x-amz-meta-release-tag),
+# so unchanged releases are skipped without extra state.
+
+on:
+  schedule:
+    - cron: "17 */6 * * *" # every 6 hours
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Re-upload even if the tag is unchanged"
+        type: boolean
+        default: false
+
+concurrency:
+  group: happ-mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repo: Happ-proxy/happ-android
+            asset: Happ.apk
+            content_type: application/vnd.android.package-archive
+          - repo: Happ-proxy/happ-desktop
+            asset: setup-Happ.x64.exe
+            content_type: application/octet-stream
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.YC_STORAGE_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.YC_STORAGE_SECRET }}
+      AWS_DEFAULT_REGION: ru-central1
+      BUCKET: geo-freenternet
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Mirror ${{ matrix.asset }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+            echo "::error::YC_STORAGE_KEY_ID/YC_STORAGE_SECRET not set"
+            exit 1
+          fi
+
+          REPO="${{ matrix.repo }}"
+          ASSET="${{ matrix.asset }}"
+          PUBLIC_URL="https://$BUCKET.storage.yandexcloud.net/$ASSET"
+
+          RELEASE=$(gh api "repos/$REPO/releases/latest")
+          TAG=$(jq -r '.tag_name' <<<"$RELEASE")
+          SIZE=$(jq -r --arg a "$ASSET" '.assets[] | select(.name == $a) | .size' <<<"$RELEASE")
+          if [ -z "$TAG" ] || [ -z "$SIZE" ]; then
+            echo "::error::$ASSET not found in latest release of $REPO"
+            exit 1
+          fi
+          echo "Latest $REPO: $TAG ($ASSET, $SIZE bytes)"
+
+          MIRRORED=$(curl -fsSI "$PUBLIC_URL" 2>/dev/null \
+            | tr -d '\r' | awk -F': ' 'tolower($1)=="x-amz-meta-release-tag"{print $2}' || true)
+          echo "Mirrored tag: ${MIRRORED:-<none>}"
+          if [ "$MIRRORED" = "$TAG" ] && [ "${{ inputs.force || 'false' }}" != "true" ]; then
+            echo "Up to date, skipping"
+            exit 0
+          fi
+
+          gh release download "$TAG" --repo "$REPO" --pattern "$ASSET" --dir dl --clobber
+          ACTUAL=$(stat -c %s "dl/$ASSET")
+          if [ "$ACTUAL" != "$SIZE" ]; then
+            echo "::error::Size mismatch for $ASSET: got $ACTUAL, expected $SIZE"
+            exit 1
+          fi
+
+          aws --endpoint-url=https://storage.yandexcloud.net \
+            s3 cp "dl/$ASSET" "s3://$BUCKET/$ASSET" \
+            --content-type "${{ matrix.content_type }}" \
+            --content-disposition "attachment; filename=\"$ASSET\"" \
+            --cache-control "public, max-age=300" \
+            --metadata "release-tag=$TAG" \
+            --no-progress
+
+          LOCAL=$(sha256sum "dl/$ASSET" | cut -d' ' -f1)
+          REMOTE=$(curl -fsSL --retry 3 -H 'Cache-Control: no-cache' "$PUBLIC_URL" | sha256sum | cut -d' ' -f1)
+          if [ "$LOCAL" != "$REMOTE" ]; then
+            echo "::error::Yandex mirror mismatch for $ASSET (local $LOCAL != remote $REMOTE)"
+            exit 1
+          fi
+          echo "$ASSET $TAG mirrored OK ($LOCAL)"
