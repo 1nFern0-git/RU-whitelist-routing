@@ -9,3 +9,4 @@ f6.security
 kaspersky-labs.com
 ru.tracker-api.my.com
 ozonusercontent.com
+x5static.net
