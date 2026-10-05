@@ -7,3 +7,4 @@ sberbank-tele.com
 sberbank.com
 f6.security
 kaspersky-labs.com
+ru.tracker-api.my.com
