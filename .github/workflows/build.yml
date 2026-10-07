@@ -249,6 +249,26 @@ jobs:
             echo "$f mirrored OK ($LOCAL)"
           done
 
+          # Hash files next to the geo files: INCY fetches <file>.sha256 (64-char
+          # hex, nothing else) before the file itself and skips the download when
+          # the hash is unchanged; without them it falls back to LastUpdated.
+          # Uploaded after the .dat files, so a new hash never points at an old file.
+          for f in geoip.dat geosite.dat; do
+            sha256sum "output/$f" | cut -d' ' -f1 | tr -d '\n' > "output/$f.sha256"
+            aws --endpoint-url=https://storage.yandexcloud.net \
+              s3 cp "output/$f.sha256" "s3://$BUCKET/$f.sha256" \
+              --content-type text/plain \
+              --cache-control "public, max-age=300" \
+              --no-progress
+            REMOTE=$(curl -fsSL --retry 3 -H 'Cache-Control: no-cache' \
+              "https://$BUCKET.storage.yandexcloud.net/$f.sha256")
+            if [ "$REMOTE" != "$(cat "output/$f.sha256")" ]; then
+              echo "::error::Yandex mirror hash file mismatch for $f.sha256"
+              exit 1
+            fi
+            echo "$f.sha256 mirrored OK"
+          done
+
       - name: Commit and push changes
         if: github.ref_name == 'main'
         run: |
