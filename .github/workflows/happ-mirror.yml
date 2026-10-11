@@ -1,10 +1,12 @@
-name: Mirror Happ installers
+name: Mirror app installers
 
-# Mirrors the latest Happ release assets (Android APK, Windows x64 installer)
+# Mirrors the latest Happ and INCY release assets (Android APK, Windows x64 installer)
 # into Yandex Object Storage, so the subscription page can link to stable
 # direct URLs reachable from Russia:
 #   https://geo-freenternet.storage.yandexcloud.net/Happ.apk
 #   https://geo-freenternet.storage.yandexcloud.net/setup-Happ.x64.exe
+#   https://geo-freenternet.storage.yandexcloud.net/Incy.apk
+#   https://geo-freenternet.storage.yandexcloud.net/incy-windows-setup.exe
 # The mirrored release tag is kept in object metadata (x-amz-meta-release-tag),
 # so unchanged releases are skipped without extra state.
 
@@ -34,6 +36,12 @@ jobs:
             content_type: application/vnd.android.package-archive
           - repo: Happ-proxy/happ-desktop
             asset: setup-Happ.x64.exe
+            content_type: application/octet-stream
+          - repo: INCY-DEV/incy-platforms
+            asset: Incy.apk
+            content_type: application/vnd.android.package-archive
+          - repo: INCY-DEV/incy-platforms
+            asset: incy-windows-setup.exe
             content_type: application/octet-stream
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.YC_STORAGE_KEY_ID }}
