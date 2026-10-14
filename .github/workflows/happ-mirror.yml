@@ -63,11 +63,15 @@ jobs:
           ASSET="${{ matrix.asset }}"
           PUBLIC_URL="https://$BUCKET.storage.yandexcloud.net/$ASSET"
 
-          RELEASE=$(gh api "repos/$REPO/releases/latest")
-          TAG=$(jq -r '.tag_name' <<<"$RELEASE")
+          # Newest published release that carries the asset: INCY ships desktop-v* and android-v*
+          # as separate releases, so releases/latest may lack Incy.apk.
+          RELEASE=$(gh api "repos/$REPO/releases?per_page=30" | jq --arg a "$ASSET" \
+            '[.[] | select((.draft or .prerelease) | not) | select(any(.assets[]; .name == $a))]
+             | sort_by(.published_at) | last // empty')
+          TAG=$(jq -r '.tag_name // empty' <<<"$RELEASE")
           SIZE=$(jq -r --arg a "$ASSET" '.assets[] | select(.name == $a) | .size' <<<"$RELEASE")
           if [ -z "$TAG" ] || [ -z "$SIZE" ]; then
-            echo "::error::$ASSET not found in latest release of $REPO"
+            echo "::error::$ASSET not found in recent releases of $REPO"
             exit 1
           fi
           echo "Latest $REPO: $TAG ($ASSET, $SIZE bytes)"
