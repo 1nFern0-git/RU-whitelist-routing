@@ -11,3 +11,22 @@ vkuser.net
 vk-portal.net
 vk-cdn.net
 mradx.net
+# 15.10: on the official MTS whitelist page and reachable in MTS whitelist mode (SNI probe)
+arsenaluslug.ru
+doctor71.ru
+or71.ru
+xn--71-glciu3an.xn--p1ai
+food.ru
+go.yandex
+kion.ru
+monitoring.plus
+mts-link.ru
+mtsbank.ru
+otello.ru
+rg.ru
+russian.rt.com
+service.urentbike.ru
+starline.ru
+tbank.ru
+ticketland.ru
+travel2moscow.com
