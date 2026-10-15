@@ -13,3 +13,15 @@ sport24.ru
 timeweb.cloud
 tutu.ru
 winelab.ru
+# 15.10: not reachable in MTS whitelist mode (3 runs), outside Qrator
+auto.ru
+fix-price.com
+gu-st.ru
+kaspersky.com
+kazanexpress.ru
+mil.ru
+mm.ru
+ngenix.net
+premier.one
+psbank.ru
+spastv.ru
