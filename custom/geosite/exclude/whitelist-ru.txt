@@ -1,1 +1,15 @@
 full:yoomoney.ru
+# 15.10: not reachable in MTS whitelist mode (3 runs + live recheck): Qrator IPs not on the whitelist, single A record
+24h.tv
+bitrix24.ru
+giga.chat
+ilovesakura.ru
+kemerovo.ru
+kprf.ru
+magnit.ru
+partners.lemanapro.ru
+ruwiki.ru
+sport24.ru
+timeweb.cloud
+tutu.ru
+winelab.ru
