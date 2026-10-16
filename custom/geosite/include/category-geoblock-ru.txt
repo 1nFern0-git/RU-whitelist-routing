@@ -1,0 +1,7 @@
+# Заблокированы в РФ (РКН), из-за рубежа открываются — проверено 16.10.2026; через прокси во всех шаблонах
+tvrain.ru
+theins.ru
+novayagazeta.ru
+echo.msk.ru
+the-village.ru
+jut.su

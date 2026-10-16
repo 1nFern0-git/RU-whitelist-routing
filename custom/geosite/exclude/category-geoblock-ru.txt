@@ -1,0 +1,2 @@
+# Зона com.ua: иначе yandex.com.ua (наш whitelist → direct) уходит в прокси; остальные .com.ua и так в туннеле через catch-all (16.10.2026)
+domain:com.ua
