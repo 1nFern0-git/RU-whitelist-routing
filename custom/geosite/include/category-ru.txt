@@ -8,3 +8,4 @@ diginetica.net
 integrationapi.net
 whitei.net
 volganet.net
+bitrix.info
