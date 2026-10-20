@@ -7,3 +7,4 @@ k2.cloud
 diginetica.net
 integrationapi.net
 whitei.net
+volganet.net
