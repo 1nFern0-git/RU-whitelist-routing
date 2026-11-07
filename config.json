@@ -18,13 +18,13 @@
     "geoip": [
       {
         "name": "WHITELIST-RU",
-        "file": "release/IP-whitelist.txt"
+        "file": "release/IP-whitelist-common.txt"
       }
     ],
     "geosite": [
       {
         "name": "WHITELIST-RU",
-        "file": "release/whitelist.txt"
+        "file": "release/whitelist-common.txt"
       }
     ]
   },
