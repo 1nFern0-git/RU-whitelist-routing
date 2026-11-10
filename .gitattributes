@@ -1,0 +1,24 @@
+# Переводы строк: в репозитории и на диске — LF на любой машине, независимо от core.autocrlf
+* text=auto eol=lf
+
+# Windows-скрипты cmd обязаны быть CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Бинарные — не трогать
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.7z binary
+*.gz binary
+*.exe binary
+*.dll binary
+*.bin binary
+*.pcap binary
+*.xlsx binary
+*.docx binary
