@@ -9,3 +9,16 @@ integrationapi.net
 whitei.net
 volganet.net
 bitrix.info
+# 17.11: node_ru_report корзина C — catch-all, DoH даёт RU-IP; RU-сервисы целиком, у глобальных брендов — только RU-хосты
+vigo.tech
+kimberlite.io
+buzzoola.com
+videoroll.net
+full:rus-dsu.shalltry.com
+full:ru.hlth.io.mi.com
+full:rus-api-bak.ot.miui.com
+full:rus-trancare.transsion-os.com
+full:rus-mqtt-cluster02.transsion-os.com
+full:bus-ru.aiee1.com
+full:bkstats2.bigolive.tv
+full:dmss-rg.dolynkcloud.com
