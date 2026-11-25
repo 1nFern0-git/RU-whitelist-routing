@@ -84,10 +84,20 @@ def category_repo(category, default_repo, default_branch):
 
 def collect_category_contents(category, default_repo, default_branch):
     """
-    Fetch raw text content(s) for a category. Supports two modes:
+    Fetch raw text content(s) for a category. Supports three modes:
+    - 'local': file inside this repository (frozen snapshot), path relative to repo root
     - 'file': single file at category['file']
     - 'source': directory listing; fetches every file inside category['source']
     """
+    if 'local' in category:
+        local_path = Path(__file__).parent.parent / category['local']
+        print(f"Processing local {category['local']}...", file=sys.stderr)
+        try:
+            return [local_path.read_text(encoding='utf-8')]
+        except OSError as e:
+            print(f"ERROR: Failed to read {local_path}: {e}", file=sys.stderr)
+            return []
+
     repo, branch = category_repo(category, default_repo, default_branch)
 
     if 'file' in category:

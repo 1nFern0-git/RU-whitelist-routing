@@ -18,13 +18,15 @@
     "geoip": [
       {
         "name": "WHITELIST-RU",
-        "file": "release/IP-whitelist-common.txt"
+        "local": "frozen/whitelist-ru/IP-whitelist.txt",
+        "_frozen": "25.11.2026: снимок релиза 20261104; было file release/IP-whitelist-common.txt из kirilllavrov/whitelists (удалён автором 20.11)"
       }
     ],
     "geosite": [
       {
         "name": "WHITELIST-RU",
-        "file": "release/whitelist-common.txt"
+        "local": "frozen/whitelist-ru/whitelist.txt",
+        "_frozen": "25.11.2026: снимок релиза 20261104; было file release/whitelist-common.txt из kirilllavrov/whitelists (удалён автором 20.11)"
       }
     ]
   },

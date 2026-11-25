@@ -104,7 +104,9 @@ python scripts/validate_build.py           # проверка инвариант
 - [hydraponique/roscomvpn-geoip](https://github.com/hydraponique/roscomvpn-geoip) - базовый GeoIP файл
 - [hydraponique/roscomvpn-geosite](https://github.com/hydraponique/roscomvpn-geosite) - исходники GeoSite категорий (`data/`)
 - [v2fly/domain-list-community](https://github.com/v2fly/domain-list-community) - сборщик geosite.dat
-- [kirilllavrov/whitelists](https://github.com/kirilllavrov/whitelists) - whitelist данные (IP и RU-домены)
+- [kirilllavrov/whitelists](https://github.com/kirilllavrov/whitelists) - whitelist данные (IP и RU-домены).
+  С 25.11.2026 WHITELIST-RU заморожен на снимке релиза `20261104` (`frozen/whitelist-ru/`, `"local"` в `config.json`):
+  автор пересобирает проект, готовые списки из `release/` удалены. Вернуть источник — заменить `local` на `file` в `config.json`.
 
 ## Лицензия
 
